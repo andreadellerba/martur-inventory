@@ -367,7 +367,7 @@
 
   var STATUS = {
     uso:         { label: "In uso",         cls: "status-uso" },
-    stock:       { label: "In magazzino",   cls: "status-stock" },
+    stock:       { label: "In stock",       cls: "status-stock" },
     riparazione: { label: "In riparazione", cls: "status-riparazione" },
     dismesso:    { label: "Dismesso",       cls: "status-dismesso" }
   };
@@ -1216,7 +1216,7 @@
           '<div class="cat-stats">' +
             '<div class="cat-stat tot"><span class="n">'+items.length+'</span><span class="l">Totali</span></div>' +
             '<div class="cat-stat uso"><span class="n">'+c.uso+'</span><span class="l">In uso</span></div>' +
-            '<div class="cat-stat stock"><span class="n">'+c.stock+'</span><span class="l">Magazzino</span></div>' +
+            '<div class="cat-stat stock"><span class="n">'+c.stock+'</span><span class="l">In stock</span></div>' +
           '</div>' +
         '</div>'
       );
@@ -1330,9 +1330,7 @@
         '</div>' +
       '</div>' +
       banner +
-      '<div class="section-title"><h2>Categorie</h2><span class="hint">clic su una categoria per filtrare l’elenco</span></div>' +
       renderCategoryGrid() +
-      '<div class="section-title"><h2>Elenco articoli</h2></div>' +
       renderToolbar() +
       renderTable()
     );
