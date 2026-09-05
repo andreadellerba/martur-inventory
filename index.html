@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Inventario IT Martur</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Jost:wght@300;400;500&display=swap">
 <style>
   :root{
     --bg:#0a0b10;
@@ -93,6 +93,12 @@
   .topbar h1{font-size:27px;letter-spacing:.005em;}
   .topbar h1 .brand{color:var(--text-dim);font-weight:500;}
   .topbar h1 .sep{color:var(--accent);margin:0 9px;font-weight:400;}
+  /* "IT Inventory" nello stesso carattere geometrico del logo Martur Italy,
+     cosi le due meta della testata sembrano un marchio unico. */
+  .brand-sub{
+    font-family:"Jost",system-ui,sans-serif;font-weight:400;font-size:.93em;
+    letter-spacing:.045em;color:var(--text);
+  }
   /* ---- logo e schermata di accesso ---- */
   .brand-logo{height:26px;width:auto;display:block;}
   .gate{
@@ -105,8 +111,8 @@
   .gate-brand{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:22px;}
   .gate-brand .brand-logo{height:34px;}
   .gate-sub{
-    font-family:"IBM Plex Sans Condensed",sans-serif;font-size:17px;font-weight:600;
-    letter-spacing:.04em;text-transform:uppercase;color:var(--text-dim);
+    font-family:"Jost",system-ui,sans-serif;font-size:22px;font-weight:400;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);
   }
   .gate-sub .sep{color:var(--accent);margin-right:8px;}
   .gate-flags{display:flex;gap:10px;justify-content:center;margin-bottom:24px;}
@@ -263,6 +269,21 @@
     color:var(--cat-color,var(--accent));background:var(--surface);
     border:1px solid var(--border-strong);border-radius:8px;padding:1px 7px;
   }
+
+  /* ---- registro modifiche ---- */
+  .log-list{display:block;}
+  .log-day{
+    font-family:"IBM Plex Sans Condensed",sans-serif;font-size:11px;font-weight:700;
+    letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);
+    margin:14px 0 6px;padding-bottom:5px;border-bottom:1px solid var(--border);
+  }
+  .log-day:first-child{margin-top:0;}
+  .log-row{display:flex;gap:12px;align-items:baseline;padding:5px 0;font-size:13px;}
+  .log-time{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);
+    flex:0 0 46px;
+  }
+  .log-text{color:var(--text-dim);}
 
   .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-m);}
   table{width:100%;border-collapse:collapse;font-size:13px;min-width:860px;}
@@ -584,7 +605,24 @@
       delItemAsk:"Eliminare definitivamente questo articolo dall’inventario?",
       notSet:"non specificato",
       footerNote:"Martur Italy · IT Inventory · accesso protetto da password",
-      docTitle:"Inventario IT Martur"
+      docTitle:"Inventario IT Martur",
+      logTitle:"Registro modifiche",
+      logSub:"Tutte le modifiche fatte all'inventario, dalla piu recente.",
+      logEmpty:"Nessuna modifica registrata.",
+      logToday:"Oggi",
+      logYesterday:"Ieri",
+      unnamed:"senza nome",
+      kItemAdd:"Nuovo articolo “{n}” in {c}",
+      kItemEdit:"Modificato articolo “{n}” in {c}",
+      kItemDel:"Eliminato articolo “{n}” da {c}",
+      kCatAdd:"Nuova categoria “{n}”",
+      kCatEdit:"Modificata categoria “{n}”",
+      kCatDel:"Eliminata categoria “{n}”",
+      kCatMove:"Spostata categoria “{n}”",
+      kFieldAdd:"Nuovo campo “{n}” in {c}",
+      kFieldEdit:"Modificato campo “{n}” in {c}",
+      kFieldDel:"Eliminato campo “{n}” da {c}",
+      kFieldMove:"Spostato campo “{n}” in {c}"
     },
     en: {
       subtitle:"IT Inventory",
@@ -683,7 +721,24 @@
       delItemAsk:"Permanently delete this item from the inventory?",
       notSet:"not set",
       footerNote:"Martur Italy · IT Inventory · password protected access",
-      docTitle:"Martur IT Inventory"
+      docTitle:"Martur IT Inventory",
+      logTitle:"Change log",
+      logSub:"Every change made to the inventory, most recent first.",
+      logEmpty:"No changes recorded yet.",
+      logToday:"Today",
+      logYesterday:"Yesterday",
+      unnamed:"unnamed",
+      kItemAdd:"New item “{n}” in {c}",
+      kItemEdit:"Edited item “{n}” in {c}",
+      kItemDel:"Deleted item “{n}” from {c}",
+      kCatAdd:"New category “{n}”",
+      kCatEdit:"Edited category “{n}”",
+      kCatDel:"Deleted category “{n}”",
+      kCatMove:"Moved category “{n}”",
+      kFieldAdd:"New field “{n}” in {c}",
+      kFieldEdit:"Edited field “{n}” in {c}",
+      kFieldDel:"Deleted field “{n}” from {c}",
+      kFieldMove:"Moved field “{n}” in {c}"
     }
   };
   function currentLang(){
@@ -708,6 +763,7 @@
     lang: "it",
     categories: [],
     items: [],
+    changes: [],
     unlocked: false,
     search: "",
     filterCategory: "all",
@@ -717,7 +773,8 @@
     expandedId: null
   };
 
-  var db = null, categoriesCol = null, itemsCol = null;
+  var db = null, categoriesCol = null, itemsCol = null, changesCol = null;
+  var logOverlay = null;
   var fieldEditor = { categoryId:null, editingId:null };
 
   /* ============ UTIL ============ */
@@ -851,6 +908,36 @@
     return list;
   }
 
+  /* ============ REGISTRO MODIFICHE ============ */
+  // Ogni scrittura lascia una riga con cosa e' cambiato e quando. Il tipo viene
+  // salvato come chiave, cosi il registro si legge nella lingua scelta.
+  async function logChange(kind, name, catName){
+    var entry = {
+      at: new Date().toISOString(),
+      kind: kind,
+      name: name || "",
+      cat: catName || ""
+    };
+    if (db && changesCol) {
+      try { await changesCol.doc(uid()).set(entry); } catch(e){}
+    } else {
+      state.changes.unshift(Object.assign({ id:uid() }, entry));
+      if (logOverlay) renderLogBody();
+    }
+  }
+  // Identificativo di un articolo prima che sia salvato: il primo campo della
+  // sua categoria, lo stesso che compare come titolo nell'elenco.
+  function draftLabel(catId, values){
+    var f = fieldsOf(categoryById(catId))[0];
+    if (!f) return "";
+    var v = (values || {})[f.id];
+    return (v === undefined || v === null || v === "") ? "" : displayValue(f, v);
+  }
+  function catName(catId){
+    var c = categoryById(catId);
+    return c ? c.name : tr("noCategory");
+  }
+
   /* ============ WRITES ============ */
   async function createCategory(data){
     var maxOrder = -1;
@@ -861,12 +948,15 @@
     };
     if (db) { await categoriesCol.doc(uid()).set(payload); }
     else { state.categories.push(Object.assign({id:uid()}, payload)); render(); }
+    logChange("kCatAdd", data.name);
   }
   async function editCategory(id, data){
     if (db) { await categoriesCol.doc(id).update(data); }
     else { var c = categoryById(id); if (c) Object.assign(c, data); render(); }
+    logChange("kCatEdit", data.name);
   }
   async function removeCategory(id){
+    var goneName = catName(id);
     if (db) {
       var snap = await itemsCol.where("categoryId","==",id).get();
       for (var i=0;i<snap.docs.length;i++){ await itemsCol.doc(snap.docs[i].id).delete(); }
@@ -876,8 +966,10 @@
       state.categories = state.categories.filter(function(c){ return c.id !== id; });
       render();
     }
+    logChange("kCatDel", goneName);
   }
   async function moveCategory(id, dir){
+    var movedName = catName(id);
     var list = sortedCategories();
     var idx = -1;
     for (var i=0;i<list.length;i++) if (list[i].id === id) idx = i;
@@ -891,13 +983,17 @@
       }
     }
     if (!db) render();
+    logChange("kCatMove", movedName);
   }
-  async function saveFields(catId, fields){
+  // "log" descrive l'operazione sui campi (aggiunta, modifica, eliminazione,
+  // spostamento): saveFields e' la stessa scrittura per tutte e quattro.
+  async function saveFields(catId, fields, log){
     var c = categoryById(catId);
     if (!c) return;
     if (db) { await categoriesCol.doc(catId).update({ fields: fields }); }
     else { c.fields = fields; render(); }
     c.fields = fields;
+    if (log) logChange(log.kind, log.name, c.name);
   }
 
   async function createItem(data){
@@ -905,6 +1001,7 @@
     var payload = Object.assign({}, data, { createdAt: now, updatedAt: now });
     if (db) { await itemsCol.doc(uid()).set(payload); }
     else { state.items.push(Object.assign({id:uid()}, payload)); render(); }
+    logChange("kItemAdd", draftLabel(data.categoryId, data.values), catName(data.categoryId));
   }
   async function editItem(id, data){
     var payload = Object.assign({}, data, { updatedAt: new Date().toISOString() });
@@ -914,10 +1011,15 @@
       if (idx >= 0) state.items[idx] = Object.assign({ id:id, createdAt: state.items[idx].createdAt }, payload);
       render();
     }
+    logChange("kItemEdit", draftLabel(data.categoryId, data.values), catName(data.categoryId));
   }
   async function removeItem(id){
+    var gone = findItem(id);
+    var goneLabel = gone ? itemLabel(gone) : "";
+    var goneCat = gone ? catName(gone.categoryId) : "";
     if (db) { await itemsCol.doc(id).delete(); }
     else { state.items = state.items.filter(function(it){ return it.id !== id; }); render(); }
+    logChange("kItemDel", goneLabel, goneCat);
   }
   function findItem(id){
     for (var i=0;i<state.items.length;i++) if (state.items[i].id === id) return state.items[i];
@@ -957,6 +1059,7 @@
       state.dbReady = true;
       categoriesCol = db.collection("categories");
       itemsCol = db.collection("items");
+      changesCol = db.collection("changes");
       categoriesCol.onSnapshot(function(snap){
         state.categories = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
         render();
@@ -967,6 +1070,12 @@
         state.items = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
         render();
       }, function(){ state.dbReady = false; render(); });
+      // Il registro serve solo quando lo si apre: si aggiorna da solo, ma non
+      // fa ridisegnare la pagina a ogni riga nuova.
+      changesCol.orderBy("at", "desc").limit(400).onSnapshot(function(snap){
+        state.changes = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+        if (logOverlay) renderLogBody();
+      }, function(){});
     } else {
       state.dbReady = false;
       state.categories = DEFAULT_CATEGORIES.map(function(c){
@@ -1219,7 +1328,8 @@
 
     app.innerHTML = (
       '<div class="topbar">' +
-        '<h1><img class="brand-logo" src="'+LOGO_SRC+'" alt="Martur Italy"><span class="sep">·</span>'+tr("subtitle")+'</h1>' +
+        '<h1><img class="brand-logo" src="'+LOGO_SRC+'" alt="Martur Italy"><span class="sep">·</span>' +
+          '<span class="brand-sub">'+tr("subtitle")+'</span></h1>' +
         '<div class="top-actions">' +
           '<button class="flag mini'+(state.lang==="it"?" on":"")+'" data-action="set-lang" data-lang="it" title="Italiano">' +
             '<svg viewBox="0 0 3 2" width="22" height="15" aria-hidden="true">' +
@@ -1231,6 +1341,11 @@
               '<path d="M0,0 60,30 M60,0 0,30" stroke="#C8102E" stroke-width="4"/>' +
               '<path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>' +
               '<path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></svg></button>' +
+          '<button class="flag mini" data-action="open-log" title="'+tr("logTitle")+'">' +
+            '<svg viewBox="0 0 22 15" width="22" height="15" fill="none" stroke="currentColor" ' +
+              'stroke-width="1.5" stroke-linecap="round" aria-hidden="true">' +
+              '<path d="M2 3.2h8M2 7.5h6M2 11.8h4"/>' +
+              '<circle cx="15.6" cy="8.4" r="4.6"/><path d="M15.6 6.1v2.5l1.7 1"/></svg></button>' +
           '<span class="lock-pill unlocked" data-action="lock">'+tr("lockOut")+'</span>' +
         '</div>' +
       '</div>' +
@@ -1261,6 +1376,7 @@
     if (overlay.__escHandler) document.removeEventListener("keydown", overlay.__escHandler);
     if (overlay === fieldEditorOverlay) { fieldEditorOverlay = null; fieldEditor = { categoryId:null, editingId:null }; }
     if (overlay === catManagerOverlay) { catManagerOverlay = null; }
+    if (overlay === logOverlay) { logOverlay = null; }
   }
   function closeAllModals(){
     byId("modal-root").querySelectorAll("[data-modal-overlay]").forEach(closeModal);
@@ -1268,6 +1384,57 @@
   // Con la schermata di accesso iniziale si entra gia' sbloccati: resta come
   // rete di sicurezza nel caso un'azione parta prima del render.
   function requireUnlock(){ return state.unlocked === true; }
+
+  /* ---- registro modifiche ---- */
+  function openLog(){
+    logOverlay = showModal("<div></div>", { wide:true });
+    renderLogBody();
+  }
+  function dayLabel(d){
+    var loc = state.lang === "en" ? "en-GB" : "it-IT";
+    var today = new Date(); today.setHours(0,0,0,0);
+    var day = new Date(d); day.setHours(0,0,0,0);
+    var diff = Math.round((today - day) / 86400000);
+    var full = day.toLocaleDateString(loc, { day:"numeric", month:"long", year:"numeric" });
+    if (diff === 0) return tr("logToday") + " · " + full;
+    if (diff === 1) return tr("logYesterday") + " · " + full;
+    return full;
+  }
+  function renderLogBody(){
+    if (!logOverlay) return;
+    var loc = state.lang === "en" ? "en-GB" : "it-IT";
+    var list = state.changes.slice().sort(function(a,b){
+      return String(b.at || "").localeCompare(String(a.at || ""));
+    });
+    var body;
+    if (!list.length) {
+      body = '<p style="color:var(--text-faint);font-size:13px;margin:0">'+tr("logEmpty")+'</p>';
+    } else {
+      var lastDay = "";
+      body = list.map(function(e){
+        var d = new Date(e.at);
+        if (isNaN(d)) d = new Date();
+        var head = "";
+        var key = d.toDateString();
+        if (key !== lastDay) { lastDay = key; head = '<div class="log-day">'+escapeHtml(dayLabel(d))+'</div>'; }
+        var text = tr(e.kind, {
+          n: escapeHtml(e.name || tr("unnamed")),
+          c: escapeHtml(e.cat || tr("noCategory"))
+        });
+        return head +
+          '<div class="log-row">' +
+            '<span class="log-time">'+d.toLocaleTimeString(loc, { hour:"2-digit", minute:"2-digit" })+'</span>' +
+            '<span class="log-text">'+text+'</span>' +
+          '</div>';
+      }).join("");
+    }
+    logOverlay.querySelector(".modal").innerHTML = (
+      '<div class="modal-head"><h3>'+tr("logTitle")+'</h3>' +
+        '<button class="btn btn-ghost btn-icon" data-action="close-modal">✕</button></div>' +
+      '<p class="modal-sub">'+tr("logSub")+'</p>' +
+      '<div class="scroll-list log-list">'+body+'</div>'
+    );
+  }
 
   /* ---- category manager ---- */
   var catManagerOverlay = null;
@@ -1553,6 +1720,7 @@
       case "close-modal": closeModal(overlay); return;
       case "set-lang": setLang(el.getAttribute("data-lang")); return;
       case "gate-submit": submitGate(); return;
+      case "open-log": openLog(); return;
       case "lock": state.unlocked = false; render(); return;
 
       case "filter-cat": {
@@ -1646,7 +1814,7 @@
           return nf;
         });
         fieldEditor.editingId = null;
-        saveFields(fieldEditor.categoryId, updated).then(renderFieldEditorBody);
+        saveFields(fieldEditor.categoryId, updated, { kind:"kFieldEdit", name:lbl }).then(renderFieldEditorBody);
         return;
       }
       case "delete-field": {
@@ -1658,7 +1826,8 @@
           function(){
             var fresh = categoryById(fieldEditor.categoryId);
             if (!fresh) return;
-            saveFields(fieldEditor.categoryId, fieldsOf(fresh).filter(function(f){ return f.id !== did; }))
+            saveFields(fieldEditor.categoryId, fieldsOf(fresh).filter(function(f){ return f.id !== did; }),
+              { kind:"kFieldDel", name: dfield ? dfield.label : "" })
               .then(renderFieldEditorBody);
           }, true);
         return;
@@ -1673,7 +1842,7 @@
         var tgt = pos + dir;
         if (pos < 0 || tgt < 0 || tgt >= arr.length) return;
         var sw = arr[pos]; arr[pos] = arr[tgt]; arr[tgt] = sw;
-        saveFields(fieldEditor.categoryId, arr).then(renderFieldEditorBody);
+        saveFields(fieldEditor.categoryId, arr, { kind:"kFieldMove", name: sw.label }).then(renderFieldEditorBody);
         return;
       }
       case "submit-new-field": {
@@ -1687,7 +1856,8 @@
         while (existingIds.indexOf(nid) !== -1) { nid = base + "-" + c; c++; }
         var nfield = { id:nid, label:nlbl, type:ntyp };
         if (ntyp === "select") nfield.options = nops.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
-        saveFields(fieldEditor.categoryId, fieldsOf(cat4).concat([nfield])).then(renderFieldEditorBody);
+        saveFields(fieldEditor.categoryId, fieldsOf(cat4).concat([nfield]),
+          { kind:"kFieldAdd", name:nlbl }).then(renderFieldEditorBody);
         return;
       }
 
