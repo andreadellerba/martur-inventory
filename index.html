@@ -249,6 +249,21 @@
     border:1px solid var(--border);padding:7px 12px;border-radius:12px;
   }
 
+  /* Un blocco per categoria, cosi ogni tabella porta come titoli i nomi dei
+     campi di quella categoria. */
+  .table-group + .table-group{margin-top:22px;}
+  .table-group-head{
+    display:flex;align-items:center;gap:8px;margin:0 0 8px;
+    font-family:"IBM Plex Sans Condensed",sans-serif;font-size:13px;font-weight:700;
+    letter-spacing:.07em;text-transform:uppercase;color:var(--cat-color,var(--accent));
+  }
+  .table-group-head .tg-icon{font-size:15px;line-height:1;}
+  .table-group-head .tg-count{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:0;
+    color:var(--cat-color,var(--accent));background:var(--surface);
+    border:1px solid var(--border-strong);border-radius:8px;padding:1px 7px;
+  }
+
   .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-m);}
   table{width:100%;border-collapse:collapse;font-size:13px;min-width:860px;}
   thead th{
@@ -1031,11 +1046,39 @@
     if (!list.length) {
       return '<div class="empty-state"><h3>'+tr("noResults")+'</h3><p>'+tr("noResultsSub")+'</p></div>';
     }
-    // Filtrando su una categoria si conoscono i campi: una colonna ciascuno,
-    // nell'ordine in cui l'utente li ha definiti. Su "tutte le categorie" i
-    // campi cambiano da riga a riga, quindi restano affiancati in una cella.
+    // I nomi dei campi sono sempre le intestazioni delle colonne. Poiche' ogni
+    // categoria ha campi suoi, con "tutte le categorie" l'elenco viene diviso
+    // in blocchi: uno per categoria, ciascuno con le proprie intestazioni.
     var cat = activeCategory();
-    var cols = cat ? fieldsOf(cat) : [];
+    if (cat) return tableFor(cat, list);
+
+    var groups = [];
+    sortedCategories().forEach(function(c){
+      var its = list.filter(function(it){ return it.categoryId === c.id; });
+      if (its.length) groups.push({ cat:c, items:its });
+    });
+    var orphans = list.filter(function(it){ return !categoryById(it.categoryId); });
+    if (orphans.length) {
+      groups.push({ cat:{ id:"", name:tr("noCategory"), color:"#666e80", icon:"❓", fields:[] }, items:orphans });
+    }
+    return groups.map(function(g){
+      return (
+        '<div class="table-group">' +
+          '<div class="table-group-head" style="--cat-color:'+g.cat.color+'">' +
+            '<span class="tg-icon">'+g.cat.icon+'</span>' +
+            '<span class="tg-name">'+escapeHtml(g.cat.name)+'</span>' +
+            '<span class="tg-count">'+g.items.length+'</span>' +
+          '</div>' +
+          tableFor(g.cat, g.items) +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  // Una tabella con una colonna per ogni campo della categoria, nell'ordine
+  // definito dall'utente.
+  function tableFor(cat, items){
+    var cols = fieldsOf(cat);
     var head = '<th data-sort="status">'+tr("thStatus")+sortArrow("status")+'</th>';
     if (cols.length) {
       head += cols.map(function(f, i){
@@ -1044,22 +1087,21 @@
           : '<th>'+escapeHtml(f.label)+'</th>';
       }).join("");
     } else {
-      head += '<th data-sort="name">'+tr("thItem")+sortArrow("name")+'</th>' +
-              '<th>'+tr("thSummary")+'</th>';
+      head += '<th>'+tr("thItem")+'</th>';
     }
     head += '<th></th>';
-    var span = (cols.length ? cols.length : 2) + 2;
+    var span = (cols.length || 1) + 2;
     return (
       '<div class="table-wrap"><table><thead><tr>'+head+'</tr></thead><tbody>' +
-      list.map(function(it){ return renderItemRow(it, cols, span); }).join("") +
+      items.map(function(it){ return renderItemRow(it, cols, span); }).join("") +
       '</tbody></table></div>'
     );
   }
 
   function renderItemRow(it, cols, span){
     cols = cols || [];
-    span = span || (cols.length ? cols.length : 2) + 2;
-    var cat = categoryById(it.categoryId) || { name:tr("noCategory"), color:"#666666", icon:"❓", fields:[] };
+    span = span || (cols.length || 1) + 2;
+    var cat = categoryById(it.categoryId) || { name:tr("noCategory"), color:"#666e80", icon:"❓", fields:[] };
     var st = STATUS[it.status] || STATUS.stock;
     var vals = it.values || {};
     var dash = '<span class="item-sub">—</span>';
@@ -1072,13 +1114,7 @@
         return '<td'+(i===0?' class="c-first"':'')+'>'+(has ? escapeHtml(displayValue(f, v)) : dash)+'</td>';
       }).join("");
     } else {
-      var chips = fieldsOf(cat).slice(1).filter(function(f){
-        return vals[f.id] !== undefined && vals[f.id] !== null && vals[f.id] !== "";
-      }).map(function(f){
-        return '<span class="cf-chip"><b>'+escapeHtml(f.label)+':</b> '+escapeHtml(displayValue(f, vals[f.id]))+'</span>';
-      }).join("");
-      cells += '<td class="c-first">'+(itemLabel(it, cat) ? escapeHtml(itemLabel(it, cat)) : dash)+'</td>' +
-               '<td><div class="summary-cell">'+(chips || dash)+'</div></td>';
+      cells += '<td class="c-first">'+dash+'</td>';
     }
 
     var out = (
