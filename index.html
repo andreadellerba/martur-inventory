@@ -1,0 +1,1883 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inventario IT Martur</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#0a0b10;
+    --bg-elevated:#101219;
+    --surface:#161922;
+    --surface-hi:#1e222d;
+    --border:#262b37;
+    --border-strong:#383f4f;
+    --text:#eef0f4;
+    --text-dim:#9aa1b3;
+    --text-faint:#666e80;
+    --accent:#37d0c9;
+    --danger:#fb7185;
+    --st-uso:#37d0c9;
+    --st-stock:#7c9bff;
+    --st-riparazione:#fbbf24;
+    --st-dismesso:#7d8496;
+    --radius-s:6px;
+    --radius-m:10px;
+    --radius-l:16px;
+    --shadow-modal:0 24px 60px -20px rgba(0,0,0,.7);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms!important;transition-duration:.001ms!important;}
+  }
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:"IBM Plex Sans Condensed",system-ui,sans-serif;
+    font-weight:600;
+    letter-spacing:.01em;
+    margin:0;
+    text-wrap:balance;
+  }
+  code,.mono,.tab-num{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-variant-numeric:tabular-nums;
+  }
+  a{color:var(--accent);}
+  ::selection{background:var(--accent);color:#04211f;}
+  button{font-family:inherit;}
+  input,select,textarea{
+    font-family:inherit;
+    background:var(--bg-elevated);
+    border:1px solid var(--border-strong);
+    color:var(--text);
+    border-radius:var(--radius-s);
+    padding:9px 11px;
+    font-size:13.5px;
+    width:100%;
+  }
+  input:focus,select:focus,textarea:focus,button:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    border-color:var(--accent);
+  }
+  textarea{resize:vertical;min-height:64px;}
+  label{
+    display:block;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--text-dim);
+    margin-bottom:5px;
+    font-weight:500;
+  }
+  .field{margin-bottom:14px;}
+  .field.required label::after{content:" *";color:var(--st-riparazione);}
+
+  #app-shell{max-width:1240px;margin:0 auto;padding:28px 24px 80px;}
+
+  /* ---- header ---- */
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    gap:20px;flex-wrap:wrap;margin-bottom:10px;
+    padding-bottom:20px;border-bottom:1px solid var(--border);
+  }
+  .topbar h1{font-size:27px;letter-spacing:.005em;}
+  .topbar h1 .brand{color:var(--text-dim);font-weight:500;}
+  .topbar h1 .sep{color:var(--accent);margin:0 9px;font-weight:400;}
+  .top-actions{display:flex;gap:10px;align-items:center;}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--surface);border:1px solid var(--border-strong);
+    color:var(--text);padding:9px 15px;border-radius:var(--radius-s);
+    font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;
+    transition:background .12s,border-color .12s,transform .08s;
+  }
+  .btn:hover{background:var(--surface-hi);border-color:var(--text-faint);}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--accent);border-color:var(--accent);color:#04211f;font-weight:600;}
+  .btn-primary:hover{background:#4fdcd5;border-color:#4fdcd5;}
+  .btn-danger{color:var(--danger);border-color:#5a2733;}
+  .btn-danger:hover{background:#2a1319;}
+  .btn-ghost{background:transparent;border-color:transparent;padding:8px 10px;}
+  .btn-ghost:hover{background:var(--surface);}
+  .btn-sm{padding:6px 10px;font-size:12px;}
+  .btn[disabled]{opacity:.35;cursor:not-allowed;}
+  .btn-icon{padding:8px;width:34px;height:34px;justify-content:center;}
+  .btn-icon.btn-sm{width:28px;height:28px;padding:4px;font-size:11px;}
+
+  .lock-pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:600;
+    border:1px solid var(--border-strong);cursor:pointer;background:var(--surface);
+  }
+  .lock-pill.locked{color:var(--text-dim);}
+  .lock-pill.unlocked{color:#04211f;background:var(--accent);border-color:var(--accent);}
+
+  .banner{
+    background:#241a10;border:1px solid #6b4a1a;color:#f3c988;
+    padding:10px 16px;border-radius:var(--radius-s);font-size:13px;margin:20px 0 0;
+    display:flex;gap:10px;align-items:center;
+  }
+
+  /* ---- sections ---- */
+  .section-title{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin:30px 0 14px;gap:16px;flex-wrap:wrap;
+  }
+  .section-title h2{font-size:14px;text-transform:uppercase;letter-spacing:.09em;color:var(--text-dim);}
+  .section-title .hint{font-size:12px;color:var(--text-faint);}
+
+  /* ---- category cards ---- */
+  .cat-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:14px;
+  }
+  .cat-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    cursor:pointer;position:relative;overflow:hidden;
+    transition:border-color .14s,background .14s,transform .1s;
+  }
+  .cat-card:hover{border-color:var(--border-strong);background:var(--surface-hi);transform:translateY(-1px);}
+  .cat-card.active-filter{border-color:var(--cat-color,var(--accent));}
+  .cat-card::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:var(--cat-color,var(--accent));
+  }
+  .cat-card-head{display:flex;align-items:center;gap:10px;padding:14px 15px 13px 18px;}
+  .cat-icon-chip{
+    width:30px;height:30px;border-radius:8px;flex:none;
+    display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;
+  }
+  .cat-name{
+    font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600;font-size:14px;
+    text-transform:uppercase;letter-spacing:.05em;color:var(--text);line-height:1.15;
+  }
+  .cat-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);}
+  .cat-stat{padding:13px 6px 15px;text-align:center;border-left:1px solid var(--border);}
+  .cat-stat:first-child{border-left:none;}
+  .cat-stat .n{
+    font-family:"IBM Plex Sans Condensed",sans-serif;font-size:26px;font-weight:700;
+    line-height:1.05;display:block;font-variant-numeric:tabular-nums;
+  }
+  .cat-stat .l{
+    font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;
+    color:var(--text-faint);margin-top:6px;display:block;
+  }
+  .cat-stat.tot .n{color:var(--text);}
+  .cat-stat.uso .n{color:var(--st-uso);}
+  .cat-stat.stock .n{color:var(--st-stock);}
+  .cat-card .cat-manage{
+    position:absolute;top:10px;right:8px;opacity:0;transition:opacity .12s;
+  }
+  .cat-card:hover .cat-manage{opacity:1;}
+
+  .empty-state{
+    border:1px dashed var(--border-strong);border-radius:var(--radius-m);
+    padding:40px 24px;text-align:center;color:var(--text-dim);
+  }
+  .empty-state h3{color:var(--text);margin-bottom:6px;font-size:16px;}
+  .empty-state p{font-size:13px;margin:0 0 16px;}
+
+  /* ---- toolbar / table ---- */
+  .toolbar{
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;
+  }
+  .toolbar input[type=search]{max-width:270px;}
+  .toolbar select{width:auto;min-width:150px;}
+  .toolbar .spacer{flex:1;}
+  .count-chip{
+    font-size:12px;color:var(--text-faint);background:var(--surface);
+    border:1px solid var(--border);padding:6px 11px;border-radius:999px;
+  }
+
+  .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-m);}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:860px;}
+  thead th{
+    text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--text-faint);font-weight:500;padding:11px 14px;
+    background:var(--bg-elevated);border-bottom:1px solid var(--border);
+    user-select:none;white-space:nowrap;
+  }
+  thead th[data-sort]{cursor:pointer;}
+  thead th[data-sort]:hover{color:var(--text-dim);}
+  thead th .arrow{opacity:.7;margin-left:3px;}
+  tbody tr.item-row{border-bottom:1px solid var(--border);cursor:pointer;}
+  tbody tr.item-row:hover{background:var(--surface);}
+  tbody tr.item-row td{padding:11px 14px;vertical-align:middle;}
+  .item-name{font-weight:600;color:var(--text);}
+  .item-sub{color:var(--text-faint);font-size:11.5px;margin-top:2px;}
+  .cat-badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:12px;
+    padding:3px 9px 3px 7px;border-radius:999px;background:var(--surface-hi);
+    border:1px solid var(--border-strong);white-space:nowrap;
+  }
+  .status-pill{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;
+    padding:4px 10px;border-radius:999px;white-space:nowrap;
+  }
+  .status-pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+  .status-uso{color:var(--st-uso);background:rgba(55,208,201,.12);}
+  .status-stock{color:var(--st-stock);background:rgba(124,155,255,.12);}
+  .status-riparazione{color:var(--st-riparazione);background:rgba(251,191,36,.12);}
+  .status-dismesso{color:var(--st-dismesso);background:rgba(125,132,150,.14);}
+  .row-actions{display:flex;gap:4px;justify-content:flex-end;}
+  .summary-cell{display:flex;flex-wrap:wrap;gap:6px;max-width:340px;}
+  .expand-row td{
+    background:var(--bg-elevated);padding:0 14px 18px;border-bottom:1px solid var(--border);
+  }
+  .detail-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px 22px;
+    padding-top:14px;
+  }
+  .detail-item .dl{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);margin-bottom:3px;}
+  .detail-item .dv{font-size:13px;color:var(--text);}
+  .detail-item .dv.empty{color:var(--text-faint);font-style:italic;}
+  .detail-item.long{grid-column:1/-1;white-space:pre-wrap;}
+  .cf-chip{
+    background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-s);
+    padding:4px 9px;font-size:11.5px;color:var(--text-dim);
+  }
+  .cf-chip b{color:var(--text-faint);font-weight:500;}
+
+  /* ---- modal ---- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(4,5,8,.72);
+    display:flex;align-items:flex-start;justify-content:center;
+    padding:6vh 16px;z-index:100;overflow-y:auto;
+  }
+  .modal{
+    background:var(--bg-elevated);border:1px solid var(--border-strong);
+    border-radius:var(--radius-l);box-shadow:var(--shadow-modal);
+    width:100%;max-width:560px;padding:26px 26px 22px;
+  }
+  .modal.wide{max-width:720px;}
+  .modal.narrow{max-width:400px;}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px;}
+  .modal-head h3{font-size:19px;}
+  .modal-sub{color:var(--text-dim);font-size:13px;margin:-8px 0 18px;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+  .form-grid .field.full{grid-column:1/-1;}
+  fieldset{border:none;padding:0;margin:0 0 18px;}
+  fieldset legend{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--accent);padding:0 0 8px;width:100%;border-bottom:1px solid var(--border);margin-bottom:14px;
+  }
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;align-items:center;}
+  .modal-actions .to-left{margin-right:auto;}
+
+  .swatches{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+  .swatch.selected{border-color:#fff;}
+  .swatch-custom{width:34px;height:28px;padding:0;border:1px solid var(--border-strong);border-radius:var(--radius-s);cursor:pointer;background:none;}
+  .emoji-picks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .emoji-pick{
+    background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-s);
+    width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .emoji-pick:hover{background:var(--surface-hi);}
+
+  .cat-manage-row{
+    display:flex;align-items:center;gap:9px;padding:9px 4px;border-bottom:1px solid var(--border);
+  }
+  .cat-manage-row .swatch-sm{width:14px;height:14px;border-radius:50%;flex:none;}
+  .cat-manage-row .cmr-name{flex:1;font-size:13.5px;font-weight:500;min-width:90px;}
+  .cat-manage-row .cmr-count{font-size:11.5px;color:var(--text-faint);white-space:nowrap;}
+  .order-btns{display:flex;flex-direction:column;gap:1px;}
+  .order-btns button{
+    background:var(--surface);border:1px solid var(--border-strong);color:var(--text-dim);
+    width:24px;height:15px;line-height:1;font-size:9px;cursor:pointer;padding:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .order-btns button:first-child{border-radius:4px 4px 0 0;}
+  .order-btns button:last-child{border-radius:0 0 4px 4px;border-top:none;}
+  .order-btns button:hover:not([disabled]){background:var(--surface-hi);color:var(--text);}
+  .order-btns button[disabled]{opacity:.3;cursor:not-allowed;}
+
+  .field-row{
+    display:flex;align-items:center;gap:9px;padding:8px 4px;border-bottom:1px solid var(--border);
+  }
+  .field-row .fr-label{flex:1;font-size:13.5px;min-width:80px;}
+  .type-badge{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);
+    background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px 9px;white-space:nowrap;
+  }
+  .field-row .fr-opts{font-size:11px;color:var(--text-faint);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .scroll-list{max-height:300px;overflow-y:auto;margin-bottom:18px;}
+
+  .error-text{color:var(--danger);font-size:12.5px;margin-top:8px;min-height:16px;}
+  .shake{animation:shake .3s;}
+  @keyframes shake{
+    10%,90%{transform:translateX(-1px);}
+    20%,80%{transform:translateX(2px);}
+    30%,50%,70%{transform:translateX(-4px);}
+    40%,60%{transform:translateX(4px);}
+  }
+
+  .footer-note{margin-top:44px;color:var(--text-faint);font-size:11.5px;text-align:center;}
+
+  @media (max-width:640px){
+    .form-grid{grid-template-columns:1fr;}
+    .topbar{flex-direction:column;align-items:flex-start;}
+    .topbar h1{font-size:22px;}
+  }
+</style>
+
+</head>
+<body>
+<div id="app-shell">
+  <div id="app"></div>
+  <p class="footer-note">Martur Italy &middot; IT Inventory &middot; modifica protetta da password</p>
+</div>
+<div id="modal-root"></div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+  var FIREBASE_CONFIG = {
+    apiKey: "AIzaSyD2sxdf1an22yUD-Qu3zNlEy3rWgyPdpAU",
+    authDomain: "martur-italy-inventory.firebaseapp.com",
+    projectId: "martur-italy-inventory",
+    storageBucket: "martur-italy-inventory.firebasestorage.app",
+    messagingSenderId: "153316565549",
+    appId: "1:153316565549:web:7204bbe9fe1975d1594ea4"
+  };
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ CONFIG ============ */
+  var EDIT_PASSWORD_HASH = "4354ae5bbbb38d2a3953e7c973693d5c6377c48edf015d95c74a54a5511b1c13";
+
+  var STATUS = {
+    uso:         { label: "In uso",         cls: "status-uso" },
+    stock:       { label: "In magazzino",   cls: "status-stock" },
+    riparazione: { label: "In riparazione", cls: "status-riparazione" },
+    dismesso:    { label: "Dismesso",       cls: "status-dismesso" }
+  };
+  var STATUS_ORDER = ["uso","stock","riparazione","dismesso"];
+
+  var FIELD_TYPES = {
+    text:     "Testo",
+    number:   "Numero",
+    date:     "Data",
+    textarea: "Testo lungo",
+    select:   "Elenco a scelta"
+  };
+
+  var COLOR_PALETTE = [
+    "#2dd4bf","#38bdf8","#818cf8","#a78bfa","#e879f9",
+    "#fb7185","#fb923c","#fbbf24","#a3e635","#34d399"
+  ];
+
+  var EMOJI_PICKS = ["🖥️","💻","🖥","🖨️","📶","📱","🔑","🏷️","🗄️","🎧","⌨️","🖱️","📷","🔌","📡","🔋","💾","📦"];
+
+  var DEFAULT_CATEGORIES = [
+    { name:"PC Postazione",         icon:"🖥️", color:"#2dd4bf", order:0 },
+    { name:"Notebook",              icon:"💻",  color:"#38bdf8", order:1 },
+    { name:"Monitor",               icon:"🖥",  color:"#818cf8", order:2 },
+    { name:"Stampanti",             icon:"🖨️", color:"#fb923c", order:3 },
+    { name:"Rete e Networking",     icon:"📶",  color:"#a78bfa", order:4 },
+    { name:"Dispositivi Mobili",    icon:"📱",  color:"#e879f9", order:5 },
+    { name:"Licenze Software",      icon:"🔑",  color:"#fbbf24", order:6 },
+    { name:"Scanner Barcode",       icon:"🏷️", color:"#a3e635", order:7 },
+    { name:"Server e Storage",      icon:"🗄️", color:"#34d399", order:8 },
+    { name:"Accessori Periferiche", icon:"🎧",  color:"#fb7185", order:9 }
+  ];
+
+  var DEFAULT_FIELDS = {
+    "Scanner Barcode": [
+      {
+        "id": "marca",
+        "label": "Marca",
+        "type": "text"
+      },
+      {
+        "id": "modello",
+        "label": "Modello",
+        "type": "text"
+      },
+      {
+        "id": "numero-seriale",
+        "label": "Numero seriale",
+        "type": "text"
+      },
+      {
+        "id": "tipo-connessione",
+        "label": "Tipo connessione",
+        "type": "select",
+        "options": [
+          "USB",
+          "Bluetooth",
+          "Wi-Fi",
+          "RS232",
+          "Altro"
+        ]
+      },
+      {
+        "id": "linea-reparto",
+        "label": "Linea / Reparto",
+        "type": "text"
+      },
+      {
+        "id": "assegnato-a",
+        "label": "Assegnato a",
+        "type": "text"
+      },
+      {
+        "id": "data-acquisto",
+        "label": "Data acquisto",
+        "type": "date"
+      },
+      {
+        "id": "note",
+        "label": "Note",
+        "type": "textarea"
+      }
+    ],
+    "Accessori Periferiche": [
+      {
+        "id": "tipo-accessorio",
+        "label": "Tipo accessorio",
+        "type": "select",
+        "options": [
+          "Tastiera",
+          "Mouse",
+          "Cuffie",
+          "Docking station",
+          "Webcam",
+          "Cavo",
+          "Adattatore",
+          "Altro"
+        ]
+      },
+      {
+        "id": "marca",
+        "label": "Marca",
+        "type": "text"
+      },
+      {
+        "id": "modello",
+        "label": "Modello",
+        "type": "text"
+      },
+      {
+        "id": "quantita",
+        "label": "Quantita",
+        "type": "number"
+      },
+      {
+        "id": "ubicazione",
+        "label": "Ubicazione / Magazzino",
+        "type": "text"
+      },
+      {
+        "id": "note",
+        "label": "Note",
+        "type": "textarea"
+      }
+    ],
+    "Rete e Networking": [
+      {
+        "id": "tipo-dispositivo",
+        "label": "Tipo dispositivo",
+        "type": "select",
+        "options": [
+          "Switch",
+          "Router",
+          "Access Point",
+          "Firewall",
+          "Media converter",
+          "Altro"
+        ]
+      },
+      {
+        "id": "marca",
+        "label": "Marca",
+        "type": "text"
+      },
+      {
+        "id": "modello",
+        "label": "Modello",
+        "type": "text"
+      },
+      {
+        "id": "numero-seriale",
+        "label": "Numero seriale",
+        "type": "text"
+      },
+      {
+        "id": "indirizzo-ip",
+        "label": "Indirizzo IP",
+        "type": "text"
+      },
+      {
+        "id": "indirizzo-mac",
+        "label": "Indirizzo MAC",
+        "type": "text"
+      },
+      {
+        "id": "numero-porte",
+        "label": "Numero porte",
+        "type": "number"
+      },
+      {
+        "id": "ubicazione",
+        "label": "Armadio / Rack",
+        "type": "text"
+      },
+      {
+        "id": "data-acquisto",
+        "label": "Data acquisto",
+        "type": "date"
+      },
+      {
+        "id": "note",
+        "label": "Note",
+        "type": "textarea"
+      }
+    ],
+    "Dispositivi Mobili": [
+      {
+        "id": "marca",
+        "label": "Marca",
+        "type": "text"
+      },
+      {
+        "id": "modello",
+        "label": "Modello",
+        "type": "text"
+      },
+      {
+        "id": "imei",
+        "label": "IMEI",
+        "type": "text"
+      },
+      {
+        "id": "numero-telefono",
+        "label": "Numero telefono",
+        "type": "text"
+      },
+      {
+        "id": "operatore",
+        "label": "Operatore",
+        "type": "select",
+        "options": [
+          "TIM",
+          "Vodafone",
+          "WindTre",
+          "Iliad",
+          "Fastweb",
+          "Altro"
+        ]
+      },
+      {
+        "id": "assegnato-a",
+        "label": "Assegnato a",
+        "type": "text"
+      },
+      {
+        "id": "data-acquisto",
+        "label": "Data acquisto",
+        "type": "date"
+      },
+      {
+        "id": "note",
+        "label": "Note",
+        "type": "textarea"
+      }
+    ],
+    "Monitor": [
+      {
+        "id": "marca",
+        "label": "Marca",
+        "type": "text"
+      },
+      {
+        "id": "modello",
+        "label": "Modello",
+        "type": "text"
+      },
+      {
+        "id": "numero-seriale",
+        "label": "Numero seriale",
+        "type": "text"
+      },
+      {
+        "id": "pollici",
+        "label": "Pollici",
+        "type": "number"
+      },
+      {
+        "id": "risoluzione",
+        "label": "Risoluzione",
+        "type": "text"
+      },
+      {
+        "id": "assegnato-a",
+        "label": "Assegnato a",
+        "type": "text"
+      },
+      {
+        "id": "ubicazione",
+        "label": "Ubicazione / Postazione",
+        "type": "text"
+      },
+      {
+        "id": "data-acquisto",
+        "label": "Data acquisto",
+        "type": "date"
+      },
+      {
+        "id": "note",
+        "label": "Note",
+        "type": "textarea"
+      }
+    ],
+    "Stampanti": [
+      {
+        "id": "marca",
+        "label": "Marca",
+        "type": "text"
+      },
+      {
+        "id": "modello",
+        "label": "Modello",
+        "type": "text"
+      },
+      {
+        "id": "numero-seriale",
+        "label": "Numero seriale",
+        "type": "text"
+      },
+      {
+        "id": "tipo",
+        "label": "Tipo",
+        "type": "select",
+        "options": [
+          "Laser B/N",
+          "Laser colore",
+          "Inkjet",
+          "Etichettatrice",
+          "Multifunzione"
+        ]
+      },
+      {
+        "id": "indirizzo-ip",
+        "label": "Indirizzo IP",
+        "type": "text"
+      },
+      {
+        "id": "ubicazione",
+        "label": "Ubicazione / Reparto",
+        "type": "text"
+      },
+      {
+        "id": "codice-toner",
+        "label": "Codice toner / consumabile",
+        "type": "text"
+      },
+      {
+        "id": "data-acquisto",
+        "label": "Data acquisto",
+        "type": "date"
+      },
+      {
+        "id": "note",
+        "label": "Note",
+        "type": "textarea"
+      }
+    ],
+    "Server e Storage": [
+      {
+        "id": "marca",
+        "label": "Marca",
+        "type": "text"
+      },
+      {
+        "id": "modello",
+        "label": "Modello",
+        "type": "text"
+      },
+      {
+        "id": "numero-seriale",
+        "label": "Numero seriale",
+        "type": "text"
+      },
+      {
+        "id": "ruolo",
+        "label": "Ruolo",
+        "type": "select",
+        "options": [
+          "Server applicativo",
+          "Domain controller",
+          "NAS",
+          "Backup",
+          "Virtualizzazione",
+          "Altro"
+        ]
+      },
+      {
+        "id": "indirizzo-ip",
+        "label": "Indirizzo IP",
+        "type": "text"
+      },
+      {
+        "id": "ubicazione-rack",
+        "label": "Ubicazione rack",
+        "type": "text"
+      },
+      {
+        "id": "cpu-ram",
+        "label": "CPU / RAM",
+        "type": "text"
+      },
+      {
+        "id": "capacita-storage",
+        "label": "Capacita storage",
+        "type": "text"
+      },
+      {
+        "id": "data-acquisto",
+        "label": "Data acquisto",
+        "type": "date"
+      },
+      {
+        "id": "scadenza-garanzia",
+        "label": "Scadenza garanzia",
+        "type": "date"
+      },
+      {
+        "id": "note",
+        "label": "Note",
+        "type": "textarea"
+      }
+    ],
+    "Licenze Software": [
+      {
+        "id": "fornitore",
+        "label": "Fornitore / Vendor",
+        "type": "text"
+      },
+      {
+        "id": "tipo-licenza",
+        "label": "Tipo licenza",
+        "type": "select",
+        "options": [
+          "Perpetua",
+          "Abbonamento annuale",
+          "Abbonamento mensile",
+          "OEM",
+          "Open source"
+        ]
+      },
+      {
+        "id": "product-key",
+        "label": "Product key / Codice",
+        "type": "text"
+      },
+      {
+        "id": "numero-postazioni",
+        "label": "N. postazioni",
+        "type": "number"
+      },
+      {
+        "id": "assegnata-a",
+        "label": "Assegnata a",
+        "type": "text"
+      },
+      {
+        "id": "data-scadenza",
+        "label": "Data scadenza",
+        "type": "date"
+      },
+      {
+        "id": "costo-annuo",
+        "label": "Costo annuo (EUR)",
+        "type": "number"
+      },
+      {
+        "id": "note",
+        "label": "Note",
+        "type": "textarea"
+      }
+    ],
+    "PC Postazione": [
+      {
+        "id": "marca",
+        "label": "Marca",
+        "type": "text"
+      },
+      {
+        "id": "modello",
+        "label": "Modello",
+        "type": "text"
+      },
+      {
+        "id": "numero-seriale",
+        "label": "Numero seriale",
+        "type": "text"
+      },
+      {
+        "id": "codice-bene",
+        "label": "Codice bene / Asset tag",
+        "type": "text"
+      },
+      {
+        "id": "assegnato-a",
+        "label": "Assegnato a",
+        "type": "text"
+      },
+      {
+        "id": "ubicazione",
+        "label": "Ubicazione / Postazione",
+        "type": "text"
+      },
+      {
+        "id": "reparto",
+        "label": "Reparto / Linea",
+        "type": "text"
+      },
+      {
+        "id": "sistema-operativo",
+        "label": "Sistema operativo",
+        "type": "select",
+        "options": [
+          "Windows 11 Pro",
+          "Windows 10 Pro",
+          "Windows Server",
+          "Linux",
+          "Altro"
+        ]
+      },
+      {
+        "id": "indirizzo-ip",
+        "label": "Indirizzo IP",
+        "type": "text"
+      },
+      {
+        "id": "data-acquisto",
+        "label": "Data acquisto",
+        "type": "date"
+      },
+      {
+        "id": "scadenza-garanzia",
+        "label": "Scadenza garanzia",
+        "type": "date"
+      },
+      {
+        "id": "note",
+        "label": "Note",
+        "type": "textarea"
+      }
+    ],
+    "Notebook": [
+      {
+        "id": "marca",
+        "label": "Marca",
+        "type": "text"
+      },
+      {
+        "id": "modello",
+        "label": "Modello",
+        "type": "text"
+      },
+      {
+        "id": "numero-seriale",
+        "label": "Numero seriale",
+        "type": "text"
+      },
+      {
+        "id": "codice-bene",
+        "label": "Codice bene / Asset tag",
+        "type": "text"
+      },
+      {
+        "id": "assegnato-a",
+        "label": "Assegnato a",
+        "type": "text"
+      },
+      {
+        "id": "sistema-operativo",
+        "label": "Sistema operativo",
+        "type": "select",
+        "options": [
+          "Windows 11 Pro",
+          "Windows 10 Pro",
+          "macOS",
+          "Linux",
+          "Altro"
+        ]
+      },
+      {
+        "id": "ram",
+        "label": "RAM",
+        "type": "text"
+      },
+      {
+        "id": "data-acquisto",
+        "label": "Data acquisto",
+        "type": "date"
+      },
+      {
+        "id": "scadenza-garanzia",
+        "label": "Scadenza garanzia",
+        "type": "date"
+      },
+      {
+        "id": "note",
+        "label": "Note",
+        "type": "textarea"
+      }
+    ]
+  };
+
+  /* ============ STATE ============ */
+  var state = {
+    dbReady: null,
+    categories: [],
+    items: [],
+    unlocked: false,
+    search: "",
+    filterCategory: "all",
+    filterStatus: "all",
+    sortKey: "name",
+    sortDir: "asc",
+    expandedId: null
+  };
+
+  var db = null, categoriesCol = null, itemsCol = null;
+  var fieldEditor = { categoryId:null, editingId:null };
+
+  /* ============ UTIL ============ */
+  function uid(){
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+  function escapeHtml(s){
+    if (s === undefined || s === null) return "";
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function slugify(s){
+    var base = String(s||"").toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,24);
+    return base || "campo";
+  }
+  function fmtDate(v){
+    if (!v) return "";
+    var d = new Date(v + "T00:00:00");
+    if (isNaN(d.getTime())) return String(v);
+    return d.toLocaleDateString("it-IT", { day:"2-digit", month:"2-digit", year:"numeric" });
+  }
+  async function sha256Hex(text){
+    var enc = new TextEncoder().encode(text);
+    var buf = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
+  }
+  function byId(id){ return document.getElementById(id); }
+  function hexAlpha(hex, alphaHex){
+    return (/^#[0-9a-fA-F]{6}$/.test(hex||"") ? hex : "#888888") + alphaHex;
+  }
+  function withFocusPreserved(fn){
+    var active = document.activeElement;
+    var activeId = active && active.id;
+    var selStart = null, selEnd = null;
+    if (active && "selectionStart" in active) {
+      try { selStart = active.selectionStart; selEnd = active.selectionEnd; } catch(e){}
+    }
+    fn();
+    if (activeId) {
+      var el = byId(activeId);
+      if (el) {
+        el.focus();
+        if (selStart !== null && "setSelectionRange" in el) {
+          try { el.setSelectionRange(selStart, selEnd); } catch(e){}
+        }
+      }
+    }
+  }
+
+  /* ============ DERIVED ============ */
+  function categoryById(id){
+    for (var i=0;i<state.categories.length;i++) if (state.categories[i].id === id) return state.categories[i];
+    return null;
+  }
+  function sortedCategories(){
+    return state.categories.slice().sort(function(a,b){
+      var ao = (typeof a.order === "number") ? a.order : 9999;
+      var bo = (typeof b.order === "number") ? b.order : 9999;
+      if (ao !== bo) return ao - bo;
+      return (a.name||"").localeCompare(b.name||"");
+    });
+  }
+  function fieldsOf(cat){ return (cat && Array.isArray(cat.fields)) ? cat.fields : []; }
+  function itemsForCategory(catId){
+    return state.items.filter(function(it){ return it.categoryId === catId; });
+  }
+  function countByStatus(items){
+    var c = { uso:0, stock:0, riparazione:0, dismesso:0 };
+    items.forEach(function(it){ if (c.hasOwnProperty(it.status)) c[it.status]++; });
+    return c;
+  }
+  function displayValue(field, raw){
+    if (raw === undefined || raw === null || raw === "") return "";
+    if (field.type === "date") return fmtDate(raw);
+    if (field.type === "number") {
+      var n = Number(raw);
+      return isNaN(n) ? String(raw) : n.toLocaleString("it-IT");
+    }
+    return String(raw);
+  }
+  function itemSearchBlob(it){
+    var parts = [it.name || ""];
+    var vals = it.values || {};
+    for (var k in vals) if (vals.hasOwnProperty(k)) parts.push(String(vals[k]||""));
+    return parts.join(" ").toLowerCase();
+  }
+  function filteredSortedItems(){
+    var list = state.items.slice();
+    var q = state.search.trim().toLowerCase();
+    if (q) list = list.filter(function(it){ return itemSearchBlob(it).indexOf(q) !== -1; });
+    if (state.filterCategory !== "all") list = list.filter(function(it){ return it.categoryId === state.filterCategory; });
+    if (state.filterStatus !== "all") list = list.filter(function(it){ return it.status === state.filterStatus; });
+
+    var key = state.sortKey, dir = state.sortDir === "asc" ? 1 : -1;
+    var catOrder = {};
+    sortedCategories().forEach(function(c,i){ catOrder[c.id] = i; });
+    list.sort(function(a,b){
+      var av, bv;
+      if (key === "category") { av = catOrder[a.categoryId]; bv = catOrder[b.categoryId]; }
+      else if (key === "status") { av = STATUS_ORDER.indexOf(a.status); bv = STATUS_ORDER.indexOf(b.status); }
+      else { av = (a[key]||"").toString().toLowerCase(); bv = (b[key]||"").toString().toLowerCase(); }
+      if (av < bv) return -1*dir;
+      if (av > bv) return 1*dir;
+      return 0;
+    });
+    return list;
+  }
+
+  /* ============ WRITES ============ */
+  async function createCategory(data){
+    var maxOrder = -1;
+    state.categories.forEach(function(c){ if (typeof c.order === "number" && c.order > maxOrder) maxOrder = c.order; });
+    var payload = {
+      name:data.name, icon:data.icon, color:data.color,
+      order: maxOrder + 1, fields: [], createdAt:new Date().toISOString()
+    };
+    if (db) { await categoriesCol.doc(uid()).set(payload); }
+    else { state.categories.push(Object.assign({id:uid()}, payload)); render(); }
+  }
+  async function editCategory(id, data){
+    if (db) { await categoriesCol.doc(id).update(data); }
+    else { var c = categoryById(id); if (c) Object.assign(c, data); render(); }
+  }
+  async function removeCategory(id){
+    if (db) {
+      var snap = await itemsCol.where("categoryId","==",id).get();
+      for (var i=0;i<snap.docs.length;i++){ await itemsCol.doc(snap.docs[i].id).delete(); }
+      await categoriesCol.doc(id).delete();
+    } else {
+      state.items = state.items.filter(function(it){ return it.categoryId !== id; });
+      state.categories = state.categories.filter(function(c){ return c.id !== id; });
+      render();
+    }
+  }
+  async function moveCategory(id, dir){
+    var list = sortedCategories();
+    var idx = -1;
+    for (var i=0;i<list.length;i++) if (list[i].id === id) idx = i;
+    var target = idx + dir;
+    if (idx < 0 || target < 0 || target >= list.length) return;
+    var tmp = list[idx]; list[idx] = list[target]; list[target] = tmp;
+    for (var j=0;j<list.length;j++){
+      if (list[j].order !== j) {
+        list[j].order = j;
+        if (db) await categoriesCol.doc(list[j].id).update({ order: j });
+      }
+    }
+    if (!db) render();
+  }
+  async function saveFields(catId, fields){
+    var c = categoryById(catId);
+    if (!c) return;
+    if (db) { await categoriesCol.doc(catId).update({ fields: fields }); }
+    else { c.fields = fields; render(); }
+    c.fields = fields;
+  }
+
+  async function createItem(data){
+    var now = new Date().toISOString();
+    var payload = Object.assign({}, data, { createdAt: now, updatedAt: now });
+    if (db) { await itemsCol.doc(uid()).set(payload); }
+    else { state.items.push(Object.assign({id:uid()}, payload)); render(); }
+  }
+  async function editItem(id, data){
+    var payload = Object.assign({}, data, { updatedAt: new Date().toISOString() });
+    if (db) { await itemsCol.doc(id).set(Object.assign({ createdAt: (findItem(id)||{}).createdAt || new Date().toISOString() }, payload)); }
+    else {
+      var idx = state.items.findIndex(function(it){ return it.id === id; });
+      if (idx >= 0) state.items[idx] = Object.assign({ id:id, createdAt: state.items[idx].createdAt }, payload);
+      render();
+    }
+  }
+  async function removeItem(id){
+    if (db) { await itemsCol.doc(id).delete(); }
+    else { state.items = state.items.filter(function(it){ return it.id !== id; }); render(); }
+  }
+  function findItem(id){
+    for (var i=0;i<state.items.length;i++) if (state.items[i].id === id) return state.items[i];
+    return null;
+  }
+
+  /* ============ INIT ============ */
+  async function init(){
+    try {
+      var app = (globalThis.firebase && firebase.apps && firebase.apps.length)
+        ? firebase.apps[0]
+        : (globalThis.firebase ? firebase.initializeApp(FIREBASE_CONFIG) : null);
+      if (app) {
+        // Accesso anonimo automatico: nessun popup di login, ma le regole di
+        // Firestore possono comunque richiedere una sessione autenticata per
+        // scrivere. La password resta il controllo pensato per la squadra IT;
+        // questo serve solo a tenere fuori bot e scraper casuali.
+        await firebase.auth().signInAnonymously();
+        db = firebase.firestore();
+      } else {
+        db = null;
+      }
+    } catch(e) { db = null; }
+
+    if (db) {
+      state.dbReady = true;
+      categoriesCol = db.collection("categories");
+      itemsCol = db.collection("items");
+      categoriesCol.onSnapshot(function(snap){
+        state.categories = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+        render();
+        if (catManagerOverlay) renderCategoryManagerBody(true);
+        if (fieldEditorOverlay && fieldEditor.categoryId) renderFieldEditorBody(true);
+      }, function(){ state.dbReady = false; render(); });
+      itemsCol.onSnapshot(function(snap){
+        state.items = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+        render();
+      }, function(){ state.dbReady = false; render(); });
+    } else {
+      state.dbReady = false;
+      state.categories = DEFAULT_CATEGORIES.map(function(c){
+        return Object.assign({id:uid(), fields:(DEFAULT_FIELDS[c.name]||[]), createdAt:new Date().toISOString()}, c);
+      });
+      state.items = [];
+    }
+    render();
+  }
+
+  /* ============ RENDER ============ */
+  function renderCategoryGrid(){
+    var cats = sortedCategories();
+    if (!cats.length) {
+      return '<div class="empty-state"><h3>Nessuna categoria</h3><p>Crea la prima categoria per iniziare a censire i dispositivi.</p>' +
+        '<button class="btn btn-primary" data-action="open-cat-manager">+ Nuova categoria</button></div>';
+    }
+    var cards = cats.map(function(cat){
+      var items = itemsForCategory(cat.id);
+      var c = countByStatus(items);
+      var active = state.filterCategory === cat.id;
+      return (
+        '<div class="cat-card'+(active?' active-filter':'')+'" style="--cat-color:'+cat.color+'" data-action="filter-cat" data-id="'+cat.id+'">' +
+          (state.unlocked ? '<button class="btn btn-ghost btn-icon btn-sm cat-manage" data-action="open-cat-manager" data-stop="1" title="Gestisci categorie">⚙</button>' : '') +
+          '<div class="cat-card-head">' +
+            '<span class="cat-icon-chip" style="background:'+hexAlpha(cat.color,"1f")+';border:1px solid '+hexAlpha(cat.color,"40")+'">'+cat.icon+'</span>' +
+            '<span class="cat-name">'+escapeHtml(cat.name)+'</span>' +
+          '</div>' +
+          '<div class="cat-stats">' +
+            '<div class="cat-stat tot"><span class="n">'+items.length+'</span><span class="l">Totali</span></div>' +
+            '<div class="cat-stat uso"><span class="n">'+c.uso+'</span><span class="l">In uso</span></div>' +
+            '<div class="cat-stat stock"><span class="n">'+c.stock+'</span><span class="l">Magazzino</span></div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join("");
+    return '<div class="cat-grid">'+cards+'</div>';
+  }
+
+  function renderToolbar(){
+    var catOptions = '<option value="all">Tutte le categorie</option>' + sortedCategories().map(function(c){
+      return '<option value="'+c.id+'" '+(state.filterCategory===c.id?'selected':'')+'>'+c.icon+' '+escapeHtml(c.name)+'</option>';
+    }).join("");
+    var statusOptions = '<option value="all">Tutti gli stati</option>' + STATUS_ORDER.map(function(s){
+      return '<option value="'+s+'" '+(state.filterStatus===s?'selected':'')+'>'+STATUS[s].label+'</option>';
+    }).join("");
+    return (
+      '<div class="toolbar">' +
+        '<input type="search" id="search-input" placeholder="Cerca in tutti i campi…" value="'+escapeHtml(state.search)+'">' +
+        '<select id="filter-category">'+catOptions+'</select>' +
+        '<select id="filter-status">'+statusOptions+'</select>' +
+        '<span class="count-chip">'+filteredSortedItems().length+' articoli</span>' +
+        '<span class="spacer"></span>' +
+        '<button class="btn btn-sm" data-action="open-cat-manager">Gestisci categorie</button>' +
+        (state.categories.length ? '<button class="btn btn-primary btn-sm" data-action="open-item-modal">+ Nuovo articolo</button>' : '') +
+      '</div>'
+    );
+  }
+
+  function sortArrow(key){
+    if (state.sortKey !== key) return "";
+    return '<span class="arrow">'+(state.sortDir==="asc"?"↑":"↓")+'</span>';
+  }
+
+  function renderTable(){
+    var list = filteredSortedItems();
+    if (!state.items.length) {
+      return '<div class="empty-state"><h3>Nessun articolo censito</h3><p>Aggiungi il primo dispositivo per iniziare a popolare l’inventario.</p>' +
+        '<button class="btn btn-primary" data-action="open-item-modal">+ Nuovo articolo</button></div>';
+    }
+    if (!list.length) {
+      return '<div class="empty-state"><h3>Nessun risultato</h3><p>Nessun articolo corrisponde ai filtri selezionati.</p></div>';
+    }
+    return (
+      '<div class="table-wrap"><table><thead><tr>' +
+        '<th data-sort="name">Articolo'+sortArrow("name")+'</th>' +
+        '<th data-sort="category">Categoria'+sortArrow("category")+'</th>' +
+        '<th data-sort="status">Stato'+sortArrow("status")+'</th>' +
+        '<th>Riepilogo</th>' +
+        '<th></th>' +
+      '</tr></thead><tbody>'+list.map(renderItemRow).join("")+'</tbody></table></div>'
+    );
+  }
+
+  function renderItemRow(it){
+    var cat = categoryById(it.categoryId) || { name:"Senza categoria", color:"#666666", icon:"❓", fields:[] };
+    var st = STATUS[it.status] || STATUS.stock;
+    var vals = it.values || {};
+    var summary = fieldsOf(cat).filter(function(f){
+      return vals[f.id] !== undefined && vals[f.id] !== null && vals[f.id] !== "";
+    }).slice(0,2).map(function(f){
+      return '<span class="cf-chip"><b>'+escapeHtml(f.label)+':</b> '+escapeHtml(displayValue(f, vals[f.id]))+'</span>';
+    }).join("");
+
+    var out = (
+      '<tr class="item-row" data-action="toggle-expand" data-id="'+it.id+'">' +
+        '<td><div class="item-name">'+escapeHtml(it.name)+'</div></td>' +
+        '<td><span class="cat-badge" style="border-color:'+hexAlpha(cat.color,"55")+'"><span>'+cat.icon+'</span>'+escapeHtml(cat.name)+'</span></td>' +
+        '<td><span class="status-pill '+st.cls+'"><span class="dot"></span>'+st.label+'</span></td>' +
+        '<td><div class="summary-cell">'+(summary || '<span class="item-sub">—</span>')+'</div></td>' +
+        '<td><div class="row-actions">' +
+          (state.unlocked ?
+            '<button class="btn btn-ghost btn-icon" data-action="edit-item" data-id="'+it.id+'" data-stop="1" title="Modifica">✏️</button>' +
+            '<button class="btn btn-ghost btn-icon" data-action="delete-item" data-id="'+it.id+'" data-stop="1" title="Elimina">🗑️</button>' : '') +
+        '</div></td>' +
+      '</tr>'
+    );
+    if (state.expandedId === it.id) {
+      out += '<tr class="expand-row"><td colspan="5">' + renderItemDetail(it, cat) + '</td></tr>';
+    }
+    return out;
+  }
+
+  function renderItemDetail(it, cat){
+    var vals = it.values || {};
+    var fields = fieldsOf(cat);
+    if (!fields.length) {
+      return '<div class="detail-grid"><div class="detail-item long"><div class="dv empty">Questa categoria non ha ancora campi. Aggiungili da “Gestisci categorie → Campi”.</div></div></div>';
+    }
+    var blocks = fields.map(function(f){
+      var val = displayValue(f, vals[f.id]);
+      return '<div class="detail-item'+(f.type==="textarea"?" long":"")+'">' +
+        '<div class="dl">'+escapeHtml(f.label)+'</div>' +
+        '<div class="dv'+(val?'':' empty')+'">'+(val?escapeHtml(val):"non specificato")+'</div></div>';
+    }).join("");
+    return '<div class="detail-grid">'+blocks+'</div>';
+  }
+
+  function render(){
+    var app = byId("app");
+    if (!app) return;
+    var banner = (state.dbReady === false)
+      ? '<div class="banner">⚠️ Connessione al database non disponibile: stai lavorando in modalità locale, le modifiche non verranno salvate in modo permanente.</div>'
+      : "";
+
+    app.innerHTML = (
+      '<div class="topbar">' +
+        '<h1><span class="brand">Martur Italy</span><span class="sep">·</span>IT Inventory</h1>' +
+        '<div class="top-actions">' +
+          (state.unlocked ?
+            '<span class="lock-pill unlocked" data-action="lock">🔓 Modalità modifica attiva</span>' :
+            '<span class="lock-pill locked" data-action="request-unlock">🔒 Sola lettura &middot; sblocca</span>') +
+        '</div>' +
+      '</div>' +
+      banner +
+      '<div class="section-title"><h2>Categorie</h2><span class="hint">clic su una categoria per filtrare l’elenco</span></div>' +
+      renderCategoryGrid() +
+      '<div class="section-title"><h2>Elenco articoli</h2></div>' +
+      renderToolbar() +
+      renderTable()
+    );
+  }
+
+  /* ============ MODAL PLUMBING ============ */
+  function showModal(innerHtml, opts){
+    opts = opts || {};
+    var overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.setAttribute("data-modal-overlay","1");
+    overlay.innerHTML = '<div class="modal '+(opts.wide?'wide':'')+(opts.narrow?'narrow':'')+'" role="dialog" aria-modal="true">'+innerHtml+'</div>';
+    byId("modal-root").appendChild(overlay);
+    overlay.addEventListener("mousedown", function(e){ if (e.target === overlay) closeModal(overlay); });
+    function escHandler(e){ if (e.key === "Escape") closeModal(overlay); }
+    document.addEventListener("keydown", escHandler);
+    overlay.__escHandler = escHandler;
+    return overlay;
+  }
+  function closeModal(overlay){
+    if (!overlay) return;
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    if (overlay.__escHandler) document.removeEventListener("keydown", overlay.__escHandler);
+    if (overlay === fieldEditorOverlay) { fieldEditorOverlay = null; fieldEditor = { categoryId:null, editingId:null }; }
+    if (overlay === catManagerOverlay) { catManagerOverlay = null; }
+  }
+  function closeAllModals(){
+    byId("modal-root").querySelectorAll("[data-modal-overlay]").forEach(closeModal);
+  }
+  function requireUnlock(){
+    if (state.unlocked) return true;
+    openPasswordModal();
+    return false;
+  }
+
+  /* ---- password ---- */
+  function openPasswordModal(){
+    var overlay = showModal(
+      '<div class="modal-head"><h3>🔒 Sblocca modifica</h3><button class="btn btn-ghost btn-icon" data-action="close-modal">✕</button></div>' +
+      '<p class="modal-sub">Inserisci la password per aggiungere, modificare o eliminare categorie e articoli.</p>' +
+      '<div class="field"><label for="pwd-input">Password</label><input type="password" id="pwd-input" autocomplete="off" placeholder="••••••••"></div>' +
+      '<div class="error-text" id="pwd-error"></div>' +
+      '<div class="modal-actions"><button class="btn" data-action="close-modal">Annulla</button><button class="btn btn-primary" data-action="submit-password">Sblocca</button></div>',
+      { narrow:true }
+    );
+    setTimeout(function(){ var i = byId("pwd-input"); if (i) i.focus(); }, 30);
+    overlay.addEventListener("keydown", function(e){
+      if (e.key === "Enter") { e.preventDefault(); submitPassword(overlay); }
+    });
+  }
+  async function submitPassword(overlay){
+    var input = byId("pwd-input");
+    var hash = await sha256Hex(input ? input.value : "");
+    if (hash === EDIT_PASSWORD_HASH) {
+      state.unlocked = true;
+      closeModal(overlay);
+      render();
+    } else {
+      var err = byId("pwd-error");
+      if (err) err.textContent = "Password errata. Riprova.";
+      var modal = overlay.querySelector(".modal");
+      modal.classList.remove("shake"); void modal.offsetWidth; modal.classList.add("shake");
+      if (input) { input.value = ""; input.focus(); }
+    }
+  }
+
+  /* ---- category manager ---- */
+  var catManagerOverlay = null;
+  function openCategoryManager(){
+    catManagerOverlay = showModal("<div></div>", { wide:true });
+    renderCategoryManagerBody();
+  }
+  function renderCategoryManagerBody(preserve){
+    if (!catManagerOverlay) return;
+    var keep = null;
+    if (preserve === true) {
+      var kn = catManagerOverlay.querySelector("#new-cat-name");
+      if (kn) keep = {
+        name: kn.value,
+        icon: catManagerOverlay.querySelector("#new-cat-icon").value,
+        color: catManagerOverlay.querySelector("#new-cat-color").value
+      };
+    }
+    var cats = sortedCategories();
+    var rows = cats.map(function(c, i){
+      return (
+        '<div class="cat-manage-row">' +
+          '<div class="order-btns">' +
+            '<button data-action="move-cat" data-id="'+c.id+'" data-dir="-1" '+(i===0?'disabled':'')+' title="Sposta su">▲</button>' +
+            '<button data-action="move-cat" data-id="'+c.id+'" data-dir="1" '+(i===cats.length-1?'disabled':'')+' title="Sposta giù">▼</button>' +
+          '</div>' +
+          '<span class="swatch-sm" style="background:'+c.color+'"></span>' +
+          '<span style="font-size:15px">'+c.icon+'</span>' +
+          '<span class="cmr-name">'+escapeHtml(c.name)+'</span>' +
+          '<span class="cmr-count">'+itemsForCategory(c.id).length+' art.</span>' +
+          '<button class="btn btn-sm" data-action="open-field-editor" data-id="'+c.id+'">Campi ('+fieldsOf(c).length+')</button>' +
+          '<button class="btn btn-ghost btn-icon btn-sm" data-action="edit-cat" data-id="'+c.id+'" title="Rinomina / colore">✏️</button>' +
+          '<button class="btn btn-ghost btn-icon btn-sm" data-action="delete-cat" data-id="'+c.id+'" title="Elimina">🗑️</button>' +
+        '</div>'
+      );
+    }).join("") || '<p style="color:var(--text-faint);font-size:13px">Nessuna categoria ancora.</p>';
+
+    catManagerOverlay.querySelector(".modal").innerHTML = (
+      '<div class="modal-head"><h3>Gestisci categorie</h3><button class="btn btn-ghost btn-icon" data-action="close-modal">✕</button></div>' +
+      '<p class="modal-sub">Usa le frecce per cambiare l’ordine con cui le categorie appaiono nella dashboard. “Campi” definisce i dati richiesti quando inserisci un articolo di quella categoria.</p>' +
+      '<div class="scroll-list">'+rows+'</div>' +
+      '<fieldset><legend>Nuova categoria</legend>' +
+        '<div class="field"><label for="new-cat-name">Nome categoria</label><input type="text" id="new-cat-name" placeholder="Es. Tablet"></div>' +
+        '<div class="field"><label>Icona</label>' +
+          '<input type="text" id="new-cat-icon" maxlength="4" style="width:70px;text-align:center;font-size:18px" value="'+EMOJI_PICKS[0]+'">' +
+          '<div class="emoji-picks">'+EMOJI_PICKS.map(function(e){ return '<div class="emoji-pick" data-action="pick-emoji" data-target="new-cat-icon" data-emoji="'+e+'">'+e+'</div>'; }).join('')+'</div>' +
+        '</div>' +
+        '<div class="field"><label>Colore</label><div class="swatches" id="new-cat-swatches">' +
+          COLOR_PALETTE.map(function(c,i){ return '<div class="swatch'+(i===0?' selected':'')+'" style="background:'+c+'" data-action="pick-color" data-target="new-cat-swatches" data-color="'+c+'" data-hidden-input="new-cat-color"></div>'; }).join('') +
+          '<input type="color" class="swatch-custom" id="new-cat-custom" value="'+COLOR_PALETTE[0]+'" title="Colore personalizzato">' +
+        '</div><input type="hidden" id="new-cat-color" value="'+COLOR_PALETTE[0]+'"></div>' +
+        '<button class="btn btn-primary" data-action="submit-new-category">+ Aggiungi categoria</button>' +
+      '</fieldset>'
+    );
+    if (keep) {
+      catManagerOverlay.querySelector("#new-cat-name").value = keep.name;
+      catManagerOverlay.querySelector("#new-cat-icon").value = keep.icon;
+      catManagerOverlay.querySelector("#new-cat-color").value = keep.color;
+    }
+  }
+
+  function openEditCategoryModal(catId){
+    var c = categoryById(catId);
+    if (!c) return;
+    showModal(
+      '<div class="modal-head"><h3>Modifica categoria</h3><button class="btn btn-ghost btn-icon" data-action="close-modal">✕</button></div>' +
+      '<div class="field"><label for="edit-cat-name">Nome categoria</label><input type="text" id="edit-cat-name" value="'+escapeHtml(c.name)+'"></div>' +
+      '<div class="field"><label>Icona</label>' +
+        '<input type="text" id="edit-cat-icon" maxlength="4" style="width:70px;text-align:center;font-size:18px" value="'+c.icon+'">' +
+        '<div class="emoji-picks">'+EMOJI_PICKS.map(function(e){ return '<div class="emoji-pick" data-action="pick-emoji" data-target="edit-cat-icon" data-emoji="'+e+'">'+e+'</div>'; }).join('')+'</div>' +
+      '</div>' +
+      '<div class="field"><label>Colore</label><div class="swatches" id="edit-cat-swatches">' +
+        COLOR_PALETTE.map(function(col){ return '<div class="swatch'+(col===c.color?' selected':'')+'" style="background:'+col+'" data-action="pick-color" data-target="edit-cat-swatches" data-color="'+col+'" data-hidden-input="edit-cat-color"></div>'; }).join('') +
+        '<input type="color" class="swatch-custom" id="edit-cat-custom" value="'+(/^#[0-9a-fA-F]{6}$/.test(c.color)?c.color:"#888888")+'" title="Colore personalizzato">' +
+      '</div><input type="hidden" id="edit-cat-color" value="'+c.color+'"></div>' +
+      '<div class="modal-actions"><button class="btn to-left" data-action="close-modal">Annulla</button>' +
+      '<button class="btn btn-primary" data-action="submit-edit-category" data-id="'+c.id+'">Salva</button></div>',
+      { narrow:true }
+    );
+  }
+
+  /* ---- field editor ---- */
+  var fieldEditorOverlay = null;
+  function openFieldEditor(catId){
+    fieldEditor = { categoryId: catId, editingId: null };
+    fieldEditorOverlay = showModal("<div></div>", { wide:true });
+    renderFieldEditorBody();
+  }
+  function renderFieldEditorBody(preserve){
+    if (!fieldEditorOverlay) return;
+    var keepF = null;
+    if (preserve === true) {
+      var kl = fieldEditorOverlay.querySelector("#nf-label");
+      if (kl) keepF = {
+        label: kl.value,
+        type: fieldEditorOverlay.querySelector("#nf-type").value,
+        options: fieldEditorOverlay.querySelector("#nf-options").value
+      };
+    }
+    var cat = categoryById(fieldEditor.categoryId);
+    if (!cat) { closeModal(fieldEditorOverlay); return; }
+    var fields = fieldsOf(cat);
+
+    var rows = fields.map(function(f, i){
+      if (fieldEditor.editingId === f.id) {
+        return (
+          '<div class="field-row" style="align-items:flex-start;flex-wrap:wrap">' +
+            '<input type="text" id="ef-label" value="'+escapeHtml(f.label)+'" style="flex:1;min-width:130px">' +
+            '<select id="ef-type" style="width:auto">'+Object.keys(FIELD_TYPES).map(function(t){
+              return '<option value="'+t+'" '+(f.type===t?'selected':'')+'>'+FIELD_TYPES[t]+'</option>';
+            }).join('')+'</select>' +
+            '<input type="text" id="ef-options" placeholder="Opzioni separate da virgola" value="'+escapeHtml((f.options||[]).join(", "))+'" style="flex:1;min-width:150px">' +
+            '<button class="btn btn-primary btn-sm" data-action="save-field-edit" data-id="'+f.id+'">Salva</button>' +
+            '<button class="btn btn-sm" data-action="cancel-field-edit">Annulla</button>' +
+          '</div>'
+        );
+      }
+      return (
+        '<div class="field-row">' +
+          '<div class="order-btns">' +
+            '<button data-action="move-field" data-id="'+f.id+'" data-dir="-1" '+(i===0?'disabled':'')+' title="Sposta su">▲</button>' +
+            '<button data-action="move-field" data-id="'+f.id+'" data-dir="1" '+(i===fields.length-1?'disabled':'')+' title="Sposta giù">▼</button>' +
+          '</div>' +
+          '<span class="fr-label">'+escapeHtml(f.label)+'</span>' +
+          '<span class="type-badge">'+FIELD_TYPES[f.type]+'</span>' +
+          (f.type === "select" ? '<span class="fr-opts">'+escapeHtml((f.options||[]).join(", "))+'</span>' : '') +
+          '<button class="btn btn-ghost btn-icon btn-sm" data-action="edit-field" data-id="'+f.id+'" title="Modifica">✏️</button>' +
+          '<button class="btn btn-ghost btn-icon btn-sm" data-action="delete-field" data-id="'+f.id+'" title="Elimina">🗑️</button>' +
+        '</div>'
+      );
+    }).join("") || '<p style="color:var(--text-faint);font-size:13px">Nessun campo definito: aggiungi qui sotto i dati che vuoi compilare per questa categoria.</p>';
+
+    fieldEditorOverlay.querySelector(".modal").innerHTML = (
+      '<div class="modal-head"><h3>'+cat.icon+' Campi di “'+escapeHtml(cat.name)+'”</h3>' +
+        '<button class="btn btn-ghost btn-icon" data-action="close-modal">✕</button></div>' +
+      '<p class="modal-sub">Questi sono i dati che verranno chiesti quando inserisci un articolo in questa categoria. <strong>Nome</strong> e <strong>Stato</strong> ci sono sempre e non vanno aggiunti.</p>' +
+      '<div class="scroll-list">'+rows+'</div>' +
+      '<fieldset><legend>Nuovo campo</legend><div class="form-grid">' +
+        '<div class="field"><label for="nf-label">Etichetta</label><input type="text" id="nf-label" placeholder="Es. Numero seriale"></div>' +
+        '<div class="field"><label for="nf-type">Tipo di dato</label><select id="nf-type">'+Object.keys(FIELD_TYPES).map(function(t){
+          return '<option value="'+t+'">'+FIELD_TYPES[t]+'</option>';
+        }).join('')+'</select></div>' +
+        '<div class="field full"><label for="nf-options">Opzioni (solo per “Elenco a scelta”)</label>' +
+          '<input type="text" id="nf-options" placeholder="Es. Windows 11, Windows 10, Linux"></div>' +
+      '</div>' +
+      '<button class="btn btn-primary" data-action="submit-new-field">+ Aggiungi campo</button></fieldset>'
+    );
+    if (keepF) {
+      fieldEditorOverlay.querySelector("#nf-label").value = keepF.label;
+      fieldEditorOverlay.querySelector("#nf-type").value = keepF.type;
+      fieldEditorOverlay.querySelector("#nf-options").value = keepF.options;
+    }
+  }
+
+  /* ---- item modal ---- */
+  function openItemModal(itemId){
+    var existing = itemId ? findItem(itemId) : null;
+    var cats = sortedCategories();
+    if (!cats.length) return;
+    var draft = existing ? {
+      id: existing.id,
+      categoryId: existing.categoryId,
+      name: existing.name || "",
+      status: existing.status || "stock",
+      values: Object.assign({}, existing.values || {})
+    } : { id:null, categoryId: cats[0].id, name:"", status:"stock", values:{} };
+
+    var overlay = showModal("<div></div>", { wide:true });
+    overlay.__draft = draft;
+    renderItemModalBody(overlay);
+  }
+
+  function collectItemDraft(overlay){
+    var d = overlay.__draft;
+    var cs = overlay.querySelector("#f-category");
+    var ns = overlay.querySelector("#f-name");
+    var ss = overlay.querySelector("#f-status");
+    if (cs) d.categoryId = cs.value;
+    if (ns) d.name = ns.value;
+    if (ss) d.status = ss.value;
+    overlay.querySelectorAll("[data-field-id]").forEach(function(el){
+      d.values[el.getAttribute("data-field-id")] = el.value;
+    });
+    return d;
+  }
+
+  function fieldInputHtml(f, value){
+    var attrs = 'id="fld-'+f.id+'" data-field-id="'+f.id+'"';
+    if (f.type === "textarea") return '<textarea '+attrs+'>'+escapeHtml(value||"")+'</textarea>';
+    if (f.type === "select") {
+      var opts = '<option value="">—</option>' + (f.options||[]).map(function(o){
+        return '<option value="'+escapeHtml(o)+'" '+(String(value)===String(o)?'selected':'')+'>'+escapeHtml(o)+'</option>';
+      }).join("");
+      return '<select '+attrs+'>'+opts+'</select>';
+    }
+    var t = f.type === "number" ? "number" : (f.type === "date" ? "date" : "text");
+    return '<input type="'+t+'" '+attrs+' value="'+escapeHtml(value||"")+'">';
+  }
+
+  function renderItemModalBody(overlay){
+    var d = overlay.__draft;
+    var cats = sortedCategories();
+    var cat = categoryById(d.categoryId) || cats[0];
+    if (cat) d.categoryId = cat.id;
+    var fields = fieldsOf(cat);
+
+    var catOptions = cats.map(function(c){
+      return '<option value="'+c.id+'" '+(c.id===d.categoryId?'selected':'')+'>'+c.icon+' '+escapeHtml(c.name)+'</option>';
+    }).join("");
+    var statusOptions = STATUS_ORDER.map(function(s){
+      return '<option value="'+s+'" '+(d.status===s?'selected':'')+'>'+STATUS[s].label+'</option>';
+    }).join("");
+
+    var dynamic = fields.length
+      ? '<div class="form-grid">' + fields.map(function(f){
+          return '<div class="field'+(f.type==="textarea"?" full":"")+'"><label for="fld-'+f.id+'">'+escapeHtml(f.label)+'</label>' +
+            fieldInputHtml(f, d.values[f.id]) + '</div>';
+        }).join("") + '</div>'
+      : '<p class="modal-sub" style="margin:0">Questa categoria non ha ancora campi personalizzati. ' +
+        '<button class="btn btn-sm" data-action="fields-from-item" data-id="'+d.categoryId+'">Definisci i campi</button></p>';
+
+    overlay.querySelector(".modal").innerHTML = (
+      '<div class="modal-head"><h3>'+(d.id?'Modifica articolo':'Nuovo articolo')+'</h3>' +
+        '<button class="btn btn-ghost btn-icon" data-action="close-modal">✕</button></div>' +
+      '<fieldset><legend>1 · Categoria</legend>' +
+        '<div class="field"><label for="f-category">Scegli la categoria</label><select id="f-category">'+catOptions+'</select></div>' +
+      '</fieldset>' +
+      '<fieldset><legend>2 · Dati principali</legend><div class="form-grid">' +
+        '<div class="field required"><label for="f-name">Nome / identificativo</label>' +
+          '<input type="text" id="f-name" value="'+escapeHtml(d.name)+'" placeholder="Es. PC-LINEA3-07"></div>' +
+        '<div class="field required"><label for="f-status">Stato</label><select id="f-status">'+statusOptions+'</select></div>' +
+      '</div></fieldset>' +
+      '<fieldset><legend>3 · Dati '+escapeHtml(cat ? cat.name : "")+'</legend>'+dynamic+'</fieldset>' +
+      '<div class="error-text" id="item-error"></div>' +
+      '<div class="modal-actions"><button class="btn to-left" data-action="close-modal">Annulla</button>' +
+        '<button class="btn btn-primary" data-action="submit-item">'+(d.id?'Salva modifiche':'Aggiungi articolo')+'</button></div>'
+    );
+  }
+
+  async function submitItemForm(overlay){
+    var d = collectItemDraft(overlay);
+    if (!d.name.trim()) {
+      var err = overlay.querySelector("#item-error");
+      if (err) err.textContent = "Il nome dell’articolo è obbligatorio.";
+      var nameInput = overlay.querySelector("#f-name");
+      if (nameInput) nameInput.focus();
+      return;
+    }
+    var cat = categoryById(d.categoryId);
+    var allowed = fieldsOf(cat).map(function(f){ return f.id; });
+    var clean = {};
+    allowed.forEach(function(k){ if (d.values[k] !== undefined && d.values[k] !== "") clean[k] = d.values[k]; });
+
+    var payload = { categoryId: d.categoryId, name: d.name.trim(), status: d.status, values: clean };
+    if (d.id) await editItem(d.id, payload); else await createItem(payload);
+    closeModal(overlay);
+  }
+
+  /* ---- confirm ---- */
+  function openConfirm(title, message, onConfirm, danger){
+    var overlay = showModal(
+      '<div class="modal-head"><h3>'+escapeHtml(title)+'</h3><button class="btn btn-ghost btn-icon" data-action="close-modal">✕</button></div>' +
+      '<p class="modal-sub">'+message+'</p>' +
+      '<div class="modal-actions"><button class="btn to-left" data-action="close-modal">Annulla</button>' +
+        '<button class="btn '+(danger?'btn-danger':'btn-primary')+'" id="confirm-yes">Conferma</button></div>',
+      { narrow:true }
+    );
+    overlay.querySelector("#confirm-yes").addEventListener("click", function(){
+      closeModal(overlay);
+      onConfirm();
+    });
+  }
+
+  /* ============ EVENTS ============ */
+  document.addEventListener("click", function(e){
+    var th = e.target.closest("th[data-sort]");
+    if (th) {
+      var k = th.getAttribute("data-sort");
+      if (state.sortKey === k) state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
+      else { state.sortKey = k; state.sortDir = "asc"; }
+      render();
+      return;
+    }
+
+    var el = e.target.closest("[data-action]");
+    if (!el) return;
+    if (el.getAttribute("data-stop")) e.stopPropagation();
+    var action = el.getAttribute("data-action");
+    var overlay = el.closest(".modal-overlay");
+
+    switch (action) {
+      case "close-modal": closeModal(overlay); return;
+      case "request-unlock": openPasswordModal(); return;
+      case "submit-password": submitPassword(overlay); return;
+      case "lock": state.unlocked = false; render(); return;
+
+      case "filter-cat": {
+        var cid = el.getAttribute("data-id");
+        state.filterCategory = (state.filterCategory === cid) ? "all" : cid;
+        render();
+        return;
+      }
+      case "toggle-expand": {
+        var iid = el.getAttribute("data-id");
+        state.expandedId = (state.expandedId === iid) ? null : iid;
+        render();
+        return;
+      }
+
+      case "open-cat-manager": if (!requireUnlock()) return; openCategoryManager(); return;
+      case "edit-cat": if (!requireUnlock()) return; openEditCategoryModal(el.getAttribute("data-id")); return;
+      case "move-cat": if (!requireUnlock()) return;
+        moveCategory(el.getAttribute("data-id"), Number(el.getAttribute("data-dir"))).then(renderCategoryManagerBody);
+        return;
+      case "delete-cat": {
+        if (!requireUnlock()) return;
+        var delCatId = el.getAttribute("data-id");
+        var dc = categoryById(delCatId);
+        var n = itemsForCategory(delCatId).length;
+        openConfirm("Elimina categoria",
+          n > 0
+            ? "La categoria “"+escapeHtml(dc.name)+"” contiene "+n+" articoli. Eliminandola verranno eliminati anche tutti gli articoli al suo interno. Continuare?"
+            : "Eliminare la categoria “"+escapeHtml(dc.name)+"”?",
+          function(){ removeCategory(delCatId).then(renderCategoryManagerBody); }, true);
+        return;
+      }
+      case "submit-new-category": {
+        if (!requireUnlock()) return;
+        var nm = overlay.querySelector("#new-cat-name").value.trim();
+        if (!nm) { overlay.querySelector("#new-cat-name").focus(); return; }
+        createCategory({
+          name: nm,
+          icon: overlay.querySelector("#new-cat-icon").value.trim() || EMOJI_PICKS[0],
+          color: overlay.querySelector("#new-cat-color").value
+        }).then(renderCategoryManagerBody);
+        return;
+      }
+      case "submit-edit-category": {
+        if (!requireUnlock()) return;
+        var enm = overlay.querySelector("#edit-cat-name").value.trim();
+        if (!enm) return;
+        editCategory(el.getAttribute("data-id"), {
+          name: enm,
+          icon: overlay.querySelector("#edit-cat-icon").value.trim(),
+          color: overlay.querySelector("#edit-cat-color").value
+        }).then(function(){ closeModal(overlay); renderCategoryManagerBody(); });
+        return;
+      }
+      case "pick-emoji": {
+        var ti = byId(el.getAttribute("data-target"));
+        if (ti) ti.value = el.getAttribute("data-emoji");
+        return;
+      }
+      case "pick-color": {
+        var grp = byId(el.getAttribute("data-target"));
+        var hid = byId(el.getAttribute("data-hidden-input"));
+        if (grp) grp.querySelectorAll(".swatch").forEach(function(s){ s.classList.remove("selected"); });
+        el.classList.add("selected");
+        if (hid) hid.value = el.getAttribute("data-color");
+        return;
+      }
+
+      /* --- fields --- */
+      case "open-field-editor": if (!requireUnlock()) return; openFieldEditor(el.getAttribute("data-id")); return;
+      case "fields-from-item": {
+        if (!requireUnlock()) return;
+        var fromCat = el.getAttribute("data-id");
+        closeModal(overlay);
+        openFieldEditor(fromCat);
+        return;
+      }
+      case "edit-field": fieldEditor.editingId = el.getAttribute("data-id"); renderFieldEditorBody(); return;
+      case "cancel-field-edit": fieldEditor.editingId = null; renderFieldEditorBody(); return;
+      case "save-field-edit": {
+        var cat1 = categoryById(fieldEditor.categoryId);
+        var fid = el.getAttribute("data-id");
+        var lbl = overlay.querySelector("#ef-label").value.trim();
+        var typ = overlay.querySelector("#ef-type").value;
+        var ops = overlay.querySelector("#ef-options").value;
+        if (!lbl) return;
+        var updated = fieldsOf(cat1).map(function(f){
+          if (f.id !== fid) return f;
+          var nf = { id:f.id, label:lbl, type:typ };
+          if (typ === "select") nf.options = ops.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+          return nf;
+        });
+        fieldEditor.editingId = null;
+        saveFields(fieldEditor.categoryId, updated).then(renderFieldEditorBody);
+        return;
+      }
+      case "delete-field": {
+        var cat2 = categoryById(fieldEditor.categoryId);
+        var did = el.getAttribute("data-id");
+        var dfield = fieldsOf(cat2).filter(function(f){ return f.id === did; })[0];
+        openConfirm("Elimina campo",
+          "Eliminare il campo “"+escapeHtml(dfield ? dfield.label : "")+"” da questa categoria? I valori già inseriti negli articoli non verranno più mostrati.",
+          function(){
+            var fresh = categoryById(fieldEditor.categoryId);
+            if (!fresh) return;
+            saveFields(fieldEditor.categoryId, fieldsOf(fresh).filter(function(f){ return f.id !== did; }))
+              .then(renderFieldEditorBody);
+          }, true);
+        return;
+      }
+      case "move-field": {
+        var cat3 = categoryById(fieldEditor.categoryId);
+        var mid = el.getAttribute("data-id");
+        var dir = Number(el.getAttribute("data-dir"));
+        var arr = fieldsOf(cat3).slice();
+        var pos = -1;
+        for (var q=0;q<arr.length;q++) if (arr[q].id === mid) pos = q;
+        var tgt = pos + dir;
+        if (pos < 0 || tgt < 0 || tgt >= arr.length) return;
+        var sw = arr[pos]; arr[pos] = arr[tgt]; arr[tgt] = sw;
+        saveFields(fieldEditor.categoryId, arr).then(renderFieldEditorBody);
+        return;
+      }
+      case "submit-new-field": {
+        var cat4 = categoryById(fieldEditor.categoryId);
+        var nlbl = overlay.querySelector("#nf-label").value.trim();
+        if (!nlbl) { overlay.querySelector("#nf-label").focus(); return; }
+        var ntyp = overlay.querySelector("#nf-type").value;
+        var nops = overlay.querySelector("#nf-options").value;
+        var existingIds = fieldsOf(cat4).map(function(f){ return f.id; });
+        var base = slugify(nlbl), nid = base, c = 2;
+        while (existingIds.indexOf(nid) !== -1) { nid = base + "-" + c; c++; }
+        var nfield = { id:nid, label:nlbl, type:ntyp };
+        if (ntyp === "select") nfield.options = nops.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+        saveFields(fieldEditor.categoryId, fieldsOf(cat4).concat([nfield])).then(renderFieldEditorBody);
+        return;
+      }
+
+      /* --- items --- */
+      case "open-item-modal": if (!requireUnlock()) return; openItemModal(null); return;
+      case "edit-item": if (!requireUnlock()) return; openItemModal(el.getAttribute("data-id")); return;
+      case "submit-item": submitItemForm(overlay); return;
+      case "delete-item": {
+        if (!requireUnlock()) return;
+        var delItemId = el.getAttribute("data-id");
+        var di = findItem(delItemId);
+        openConfirm("Elimina articolo",
+          "Eliminare definitivamente “"+escapeHtml(di ? di.name : "")+"” dall’inventario?",
+          function(){ removeItem(delItemId); }, true);
+        return;
+      }
+    }
+  });
+
+  document.addEventListener("input", function(e){
+    if (e.target.id === "search-input") {
+      withFocusPreserved(function(){ state.search = e.target.value; render(); });
+    }
+  });
+
+  document.addEventListener("change", function(e){
+    if (e.target.id === "filter-category") { state.filterCategory = e.target.value; render(); return; }
+    if (e.target.id === "filter-status") { state.filterStatus = e.target.value; render(); return; }
+    if (e.target.id === "f-category") {
+      var ov = e.target.closest(".modal-overlay");
+      collectItemDraft(ov);
+      renderItemModalBody(ov);
+      return;
+    }
+    if (e.target.id === "new-cat-custom" || e.target.id === "edit-cat-custom") {
+      var isNew = e.target.id === "new-cat-custom";
+      var hidden = byId(isNew ? "new-cat-color" : "edit-cat-color");
+      var group = byId(isNew ? "new-cat-swatches" : "edit-cat-swatches");
+      if (hidden) hidden.value = e.target.value;
+      if (group) group.querySelectorAll(".swatch").forEach(function(s){ s.classList.remove("selected"); });
+      return;
+    }
+  });
+
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Enter" && e.target.id === "nf-label") {
+      e.preventDefault();
+      var ov = e.target.closest(".modal-overlay");
+      var btn = ov.querySelector('[data-action="submit-new-field"]');
+      if (btn) btn.click();
+    }
+    if (e.key === "Enter" && e.target.id === "new-cat-name") {
+      e.preventDefault();
+      var ov2 = e.target.closest(".modal-overlay");
+      var btn2 = ov2.querySelector('[data-action="submit-new-category"]');
+      if (btn2) btn2.click();
+    }
+  });
+
+  init();
+})();
+</script>
+
+</body>
+</html>
