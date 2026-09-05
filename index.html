@@ -420,552 +420,8 @@
     { name:"Accessori Periferiche", icon:"🎧",  color:"#fb7185", order:9 }
   ];
 
-  var DEFAULT_FIELDS = {
-    "Scanner Barcode": [
-      {
-        "id": "marca",
-        "label": "Marca",
-        "type": "text"
-      },
-      {
-        "id": "modello",
-        "label": "Modello",
-        "type": "text"
-      },
-      {
-        "id": "numero-seriale",
-        "label": "Numero seriale",
-        "type": "text"
-      },
-      {
-        "id": "tipo-connessione",
-        "label": "Tipo connessione",
-        "type": "select",
-        "options": [
-          "USB",
-          "Bluetooth",
-          "Wi-Fi",
-          "RS232",
-          "Altro"
-        ]
-      },
-      {
-        "id": "linea-reparto",
-        "label": "Linea / Reparto",
-        "type": "text"
-      },
-      {
-        "id": "assegnato-a",
-        "label": "Assegnato a",
-        "type": "text"
-      },
-      {
-        "id": "data-acquisto",
-        "label": "Data acquisto",
-        "type": "date"
-      },
-      {
-        "id": "note",
-        "label": "Note",
-        "type": "textarea"
-      }
-    ],
-    "Accessori Periferiche": [
-      {
-        "id": "tipo-accessorio",
-        "label": "Tipo accessorio",
-        "type": "select",
-        "options": [
-          "Tastiera",
-          "Mouse",
-          "Cuffie",
-          "Docking station",
-          "Webcam",
-          "Cavo",
-          "Adattatore",
-          "Altro"
-        ]
-      },
-      {
-        "id": "marca",
-        "label": "Marca",
-        "type": "text"
-      },
-      {
-        "id": "modello",
-        "label": "Modello",
-        "type": "text"
-      },
-      {
-        "id": "quantita",
-        "label": "Quantita",
-        "type": "number"
-      },
-      {
-        "id": "ubicazione",
-        "label": "Ubicazione / Magazzino",
-        "type": "text"
-      },
-      {
-        "id": "note",
-        "label": "Note",
-        "type": "textarea"
-      }
-    ],
-    "Rete e Networking": [
-      {
-        "id": "tipo-dispositivo",
-        "label": "Tipo dispositivo",
-        "type": "select",
-        "options": [
-          "Switch",
-          "Router",
-          "Access Point",
-          "Firewall",
-          "Media converter",
-          "Altro"
-        ]
-      },
-      {
-        "id": "marca",
-        "label": "Marca",
-        "type": "text"
-      },
-      {
-        "id": "modello",
-        "label": "Modello",
-        "type": "text"
-      },
-      {
-        "id": "numero-seriale",
-        "label": "Numero seriale",
-        "type": "text"
-      },
-      {
-        "id": "indirizzo-ip",
-        "label": "Indirizzo IP",
-        "type": "text"
-      },
-      {
-        "id": "indirizzo-mac",
-        "label": "Indirizzo MAC",
-        "type": "text"
-      },
-      {
-        "id": "numero-porte",
-        "label": "Numero porte",
-        "type": "number"
-      },
-      {
-        "id": "ubicazione",
-        "label": "Armadio / Rack",
-        "type": "text"
-      },
-      {
-        "id": "data-acquisto",
-        "label": "Data acquisto",
-        "type": "date"
-      },
-      {
-        "id": "note",
-        "label": "Note",
-        "type": "textarea"
-      }
-    ],
-    "Dispositivi Mobili": [
-      {
-        "id": "marca",
-        "label": "Marca",
-        "type": "text"
-      },
-      {
-        "id": "modello",
-        "label": "Modello",
-        "type": "text"
-      },
-      {
-        "id": "imei",
-        "label": "IMEI",
-        "type": "text"
-      },
-      {
-        "id": "numero-telefono",
-        "label": "Numero telefono",
-        "type": "text"
-      },
-      {
-        "id": "operatore",
-        "label": "Operatore",
-        "type": "select",
-        "options": [
-          "TIM",
-          "Vodafone",
-          "WindTre",
-          "Iliad",
-          "Fastweb",
-          "Altro"
-        ]
-      },
-      {
-        "id": "assegnato-a",
-        "label": "Assegnato a",
-        "type": "text"
-      },
-      {
-        "id": "data-acquisto",
-        "label": "Data acquisto",
-        "type": "date"
-      },
-      {
-        "id": "note",
-        "label": "Note",
-        "type": "textarea"
-      }
-    ],
-    "Monitor": [
-      {
-        "id": "marca",
-        "label": "Marca",
-        "type": "text"
-      },
-      {
-        "id": "modello",
-        "label": "Modello",
-        "type": "text"
-      },
-      {
-        "id": "numero-seriale",
-        "label": "Numero seriale",
-        "type": "text"
-      },
-      {
-        "id": "pollici",
-        "label": "Pollici",
-        "type": "number"
-      },
-      {
-        "id": "risoluzione",
-        "label": "Risoluzione",
-        "type": "text"
-      },
-      {
-        "id": "assegnato-a",
-        "label": "Assegnato a",
-        "type": "text"
-      },
-      {
-        "id": "ubicazione",
-        "label": "Ubicazione / Postazione",
-        "type": "text"
-      },
-      {
-        "id": "data-acquisto",
-        "label": "Data acquisto",
-        "type": "date"
-      },
-      {
-        "id": "note",
-        "label": "Note",
-        "type": "textarea"
-      }
-    ],
-    "Stampanti": [
-      {
-        "id": "marca",
-        "label": "Marca",
-        "type": "text"
-      },
-      {
-        "id": "modello",
-        "label": "Modello",
-        "type": "text"
-      },
-      {
-        "id": "numero-seriale",
-        "label": "Numero seriale",
-        "type": "text"
-      },
-      {
-        "id": "tipo",
-        "label": "Tipo",
-        "type": "select",
-        "options": [
-          "Laser B/N",
-          "Laser colore",
-          "Inkjet",
-          "Etichettatrice",
-          "Multifunzione"
-        ]
-      },
-      {
-        "id": "indirizzo-ip",
-        "label": "Indirizzo IP",
-        "type": "text"
-      },
-      {
-        "id": "ubicazione",
-        "label": "Ubicazione / Reparto",
-        "type": "text"
-      },
-      {
-        "id": "codice-toner",
-        "label": "Codice toner / consumabile",
-        "type": "text"
-      },
-      {
-        "id": "data-acquisto",
-        "label": "Data acquisto",
-        "type": "date"
-      },
-      {
-        "id": "note",
-        "label": "Note",
-        "type": "textarea"
-      }
-    ],
-    "Server e Storage": [
-      {
-        "id": "marca",
-        "label": "Marca",
-        "type": "text"
-      },
-      {
-        "id": "modello",
-        "label": "Modello",
-        "type": "text"
-      },
-      {
-        "id": "numero-seriale",
-        "label": "Numero seriale",
-        "type": "text"
-      },
-      {
-        "id": "ruolo",
-        "label": "Ruolo",
-        "type": "select",
-        "options": [
-          "Server applicativo",
-          "Domain controller",
-          "NAS",
-          "Backup",
-          "Virtualizzazione",
-          "Altro"
-        ]
-      },
-      {
-        "id": "indirizzo-ip",
-        "label": "Indirizzo IP",
-        "type": "text"
-      },
-      {
-        "id": "ubicazione-rack",
-        "label": "Ubicazione rack",
-        "type": "text"
-      },
-      {
-        "id": "cpu-ram",
-        "label": "CPU / RAM",
-        "type": "text"
-      },
-      {
-        "id": "capacita-storage",
-        "label": "Capacita storage",
-        "type": "text"
-      },
-      {
-        "id": "data-acquisto",
-        "label": "Data acquisto",
-        "type": "date"
-      },
-      {
-        "id": "scadenza-garanzia",
-        "label": "Scadenza garanzia",
-        "type": "date"
-      },
-      {
-        "id": "note",
-        "label": "Note",
-        "type": "textarea"
-      }
-    ],
-    "Licenze Software": [
-      {
-        "id": "fornitore",
-        "label": "Fornitore / Vendor",
-        "type": "text"
-      },
-      {
-        "id": "tipo-licenza",
-        "label": "Tipo licenza",
-        "type": "select",
-        "options": [
-          "Perpetua",
-          "Abbonamento annuale",
-          "Abbonamento mensile",
-          "OEM",
-          "Open source"
-        ]
-      },
-      {
-        "id": "product-key",
-        "label": "Product key / Codice",
-        "type": "text"
-      },
-      {
-        "id": "numero-postazioni",
-        "label": "N. postazioni",
-        "type": "number"
-      },
-      {
-        "id": "assegnata-a",
-        "label": "Assegnata a",
-        "type": "text"
-      },
-      {
-        "id": "data-scadenza",
-        "label": "Data scadenza",
-        "type": "date"
-      },
-      {
-        "id": "costo-annuo",
-        "label": "Costo annuo (EUR)",
-        "type": "number"
-      },
-      {
-        "id": "note",
-        "label": "Note",
-        "type": "textarea"
-      }
-    ],
-    "PC Postazione": [
-      {
-        "id": "marca",
-        "label": "Marca",
-        "type": "text"
-      },
-      {
-        "id": "modello",
-        "label": "Modello",
-        "type": "text"
-      },
-      {
-        "id": "numero-seriale",
-        "label": "Numero seriale",
-        "type": "text"
-      },
-      {
-        "id": "codice-bene",
-        "label": "Codice bene / Asset tag",
-        "type": "text"
-      },
-      {
-        "id": "assegnato-a",
-        "label": "Assegnato a",
-        "type": "text"
-      },
-      {
-        "id": "ubicazione",
-        "label": "Ubicazione / Postazione",
-        "type": "text"
-      },
-      {
-        "id": "reparto",
-        "label": "Reparto / Linea",
-        "type": "text"
-      },
-      {
-        "id": "sistema-operativo",
-        "label": "Sistema operativo",
-        "type": "select",
-        "options": [
-          "Windows 11 Pro",
-          "Windows 10 Pro",
-          "Windows Server",
-          "Linux",
-          "Altro"
-        ]
-      },
-      {
-        "id": "indirizzo-ip",
-        "label": "Indirizzo IP",
-        "type": "text"
-      },
-      {
-        "id": "data-acquisto",
-        "label": "Data acquisto",
-        "type": "date"
-      },
-      {
-        "id": "scadenza-garanzia",
-        "label": "Scadenza garanzia",
-        "type": "date"
-      },
-      {
-        "id": "note",
-        "label": "Note",
-        "type": "textarea"
-      }
-    ],
-    "Notebook": [
-      {
-        "id": "marca",
-        "label": "Marca",
-        "type": "text"
-      },
-      {
-        "id": "modello",
-        "label": "Modello",
-        "type": "text"
-      },
-      {
-        "id": "numero-seriale",
-        "label": "Numero seriale",
-        "type": "text"
-      },
-      {
-        "id": "codice-bene",
-        "label": "Codice bene / Asset tag",
-        "type": "text"
-      },
-      {
-        "id": "assegnato-a",
-        "label": "Assegnato a",
-        "type": "text"
-      },
-      {
-        "id": "sistema-operativo",
-        "label": "Sistema operativo",
-        "type": "select",
-        "options": [
-          "Windows 11 Pro",
-          "Windows 10 Pro",
-          "macOS",
-          "Linux",
-          "Altro"
-        ]
-      },
-      {
-        "id": "ram",
-        "label": "RAM",
-        "type": "text"
-      },
-      {
-        "id": "data-acquisto",
-        "label": "Data acquisto",
-        "type": "date"
-      },
-      {
-        "id": "scadenza-garanzia",
-        "label": "Scadenza garanzia",
-        "type": "date"
-      },
-      {
-        "id": "note",
-        "label": "Note",
-        "type": "textarea"
-      }
-    ]
-  };
+  // Nessun campo predefinito: le categorie nascono vuote e i campi li
+  // definisce l'utente da "Gestisci categorie -> Campi".
 
   /* ============ STATE ============ */
   var state = {
@@ -1076,8 +532,18 @@
     }
     return String(raw);
   }
+  // Senza il campo Nome imposto dall'app, l'articolo si identifica col PRIMO
+  // campo definito nella categoria: e' quello che l'utente ha scelto come
+  // riferimento (matricola, seriale, codice...). Se manca, resta un trattino.
+  function itemLabel(it, cat){
+    var c = cat || categoryById(it.categoryId);
+    var first = fieldsOf(c)[0];
+    if (!first) return "";
+    var v = (it.values || {})[first.id];
+    return (v === undefined || v === null || v === "") ? "" : displayValue(first, v);
+  }
   function itemSearchBlob(it){
-    var parts = [it.name || ""];
+    var parts = [];
     var vals = it.values || {};
     for (var k in vals) if (vals.hasOwnProperty(k)) parts.push(String(vals[k]||""));
     return parts.join(" ").toLowerCase();
@@ -1096,6 +562,7 @@
       var av, bv;
       if (key === "category") { av = catOrder[a.categoryId]; bv = catOrder[b.categoryId]; }
       else if (key === "status") { av = STATUS_ORDER.indexOf(a.status); bv = STATUS_ORDER.indexOf(b.status); }
+      else if (key === "name") { av = itemLabel(a).toLowerCase(); bv = itemLabel(b).toLowerCase(); }
       else { av = (a[key]||"").toString().toLowerCase(); bv = (b[key]||"").toString().toLowerCase(); }
       if (av < bv) return -1*dir;
       if (av > bv) return 1*dir;
@@ -1212,7 +679,7 @@
     } else {
       state.dbReady = false;
       state.categories = DEFAULT_CATEGORIES.map(function(c){
-        return Object.assign({id:uid(), fields:(DEFAULT_FIELDS[c.name]||[]), createdAt:new Date().toISOString()}, c);
+        return Object.assign({id:uid(), fields:[], createdAt:new Date().toISOString()}, c);
       });
       state.items = [];
     }
@@ -1297,7 +764,9 @@
     var cat = categoryById(it.categoryId) || { name:"Senza categoria", color:"#666666", icon:"❓", fields:[] };
     var st = STATUS[it.status] || STATUS.stock;
     var vals = it.values || {};
-    var summary = fieldsOf(cat).filter(function(f){
+    // Il primo campo fa da identificativo nella colonna Articolo:
+    // qui si parte dal secondo, per non ripetere la stessa informazione.
+    var summary = fieldsOf(cat).slice(1).filter(function(f){
       return vals[f.id] !== undefined && vals[f.id] !== null && vals[f.id] !== "";
     }).slice(0,2).map(function(f){
       return '<span class="cf-chip"><b>'+escapeHtml(f.label)+':</b> '+escapeHtml(displayValue(f, vals[f.id]))+'</span>';
@@ -1305,7 +774,7 @@
 
     var out = (
       '<tr class="item-row" data-action="toggle-expand" data-id="'+it.id+'">' +
-        '<td><div class="item-name">'+escapeHtml(it.name)+'</div></td>' +
+        '<td><div class="item-name">'+(itemLabel(it, cat) ? escapeHtml(itemLabel(it, cat)) : '<span class="item-sub">—</span>')+'</div></td>' +
         '<td><span class="cat-badge" style="border-color:'+hexAlpha(cat.color,"55")+'"><span>'+cat.icon+'</span>'+escapeHtml(cat.name)+'</span></td>' +
         '<td><span class="status-pill '+st.cls+'"><span class="dot"></span>'+st.label+'</span></td>' +
         '<td><div class="summary-cell">'+(summary || '<span class="item-sub">—</span>')+'</div></td>' +
@@ -1595,10 +1064,8 @@
   function collectItemDraft(overlay){
     var d = overlay.__draft;
     var cs = overlay.querySelector("#f-category");
-    var ns = overlay.querySelector("#f-name");
     var ss = overlay.querySelector("#f-status");
     if (cs) d.categoryId = cs.value;
-    if (ns) d.name = ns.value;
     if (ss) d.status = ss.value;
     overlay.querySelectorAll("[data-field-id]").forEach(function(el){
       d.values[el.getAttribute("data-field-id")] = el.value;
@@ -1647,11 +1114,9 @@
       '<fieldset><legend>1 · Categoria</legend>' +
         '<div class="field"><label for="f-category">Scegli la categoria</label><select id="f-category">'+catOptions+'</select></div>' +
       '</fieldset>' +
-      '<fieldset><legend>2 · Dati principali</legend><div class="form-grid">' +
-        '<div class="field required"><label for="f-name">Nome / identificativo</label>' +
-          '<input type="text" id="f-name" value="'+escapeHtml(d.name)+'" placeholder="Es. PC-LINEA3-07"></div>' +
-        '<div class="field required"><label for="f-status">Stato</label><select id="f-status">'+statusOptions+'</select></div>' +
-      '</div></fieldset>' +
+      '<fieldset><legend>2 · Stato</legend>' +
+        '<div class="field"><label for="f-status">Stato</label><select id="f-status">'+statusOptions+'</select></div>' +
+      '</fieldset>' +
       '<fieldset><legend>3 · Dati '+escapeHtml(cat ? cat.name : "")+'</legend>'+dynamic+'</fieldset>' +
       '<div class="error-text" id="item-error"></div>' +
       '<div class="modal-actions"><button class="btn to-left" data-action="close-modal">Annulla</button>' +
@@ -1661,19 +1126,14 @@
 
   async function submitItemForm(overlay){
     var d = collectItemDraft(overlay);
-    if (!d.name.trim()) {
-      var err = overlay.querySelector("#item-error");
-      if (err) err.textContent = "Il nome dell’articolo è obbligatorio.";
-      var nameInput = overlay.querySelector("#f-name");
-      if (nameInput) nameInput.focus();
-      return;
-    }
     var cat = categoryById(d.categoryId);
     var allowed = fieldsOf(cat).map(function(f){ return f.id; });
     var clean = {};
     allowed.forEach(function(k){ if (d.values[k] !== undefined && d.values[k] !== "") clean[k] = d.values[k]; });
 
-    var payload = { categoryId: d.categoryId, name: d.name.trim(), status: d.status, values: clean };
+    // Niente piu campo Nome imposto dallapp: lidentificativo e il primo
+    // campo definito nella categoria, quindi non ce nulla da obbligare qui.
+    var payload = { categoryId: d.categoryId, status: d.status, values: clean };
     if (d.id) await editItem(d.id, payload); else await createItem(payload);
     closeModal(overlay);
   }
